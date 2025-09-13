@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,7 +35,6 @@
            display: -webkit-box;
            -webkit-line-clamp: 2;
            -webkit-box-orient: vertical;
-           min-height: 2.5rem; /* Ensures consistent height for 2 lines */
         }
     </style>
 </head>
@@ -251,7 +248,7 @@
 
             filteredProducts.forEach(product => {
                 const card = document.createElement('div');
-                card.className = 'product-card flex items-start bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';
+                card.className = 'product-card flex h-36 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';
                 card.dataset.productId = product.id;
                 
                 let typeIcon = '';
@@ -262,7 +259,7 @@
                 }
 
                 card.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}" class="w-32 h-32 object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';">
+                    <img src="${product.image}" alt="${product.name}" class="w-32 h-full object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';">
                     <div class="p-3 flex flex-col flex-grow">
                         <div class="flex items-center">
                             ${typeIcon}
@@ -636,4 +633,5 @@
 
 </body>
 </html>
+
 
