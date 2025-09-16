@@ -3,442 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Ordering</title>
+    <title>MASKAARI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 1. Add Cashfree SDK Script -->
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent; /* Prevents flash on mobile tap */
-        }
-        .category-btn.active {
-            background-color: #FB923C; /* Orange-400 */
-            color: white;
-            font-weight: 600;
-        }
-        /* For smooth scrolling to categories */
-        html {
-            scroll-behavior: smooth;
-        }
-        /* Custom scrollbar for category bar */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        /* For truncating description text to 2 lines */
-        .truncate-2-lines {
-           overflow: hidden;
-           text-overflow: ellipsis;
-           display: -webkit-box;
-           -webkit-line-clamp: 2;
-           -webkit-box-orient: vertical;
-        }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .category-btn.active { background-color: #FB923C; color: white; font-weight: 600; }
+        html { scroll-behavior: smooth; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .truncate-2-lines { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #FB923C; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-50">
 
-    <!-- Header Banner -->
     <header class="relative bg-gray-800">
-        <img src="https://placehold.co/600x300/FBBF24/333?text=Your+Banner" 
+        <img src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI" 
              alt="Store Banner" 
              class="w-full h-48 object-cover"
              onerror="this.onerror=null;this.src='https://placehold.co/600x300/CCCCCC/FFFFFF?text=Banner+Image';">
         <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white p-4">
-            <h1 id="store-name-banner" class="text-3xl font-bold">Your Store Name</h1>
-            <p id="store-tagline-banner" class="text-lg mt-1">Scan, Select, and Order in Seconds</p>
+            <h1 id="store-name-banner" class="text-3xl font-bold">MASKAARI</h1>
+            <p id="store-tagline-banner" class="text-lg mt-1">Muska hai Boss! Plain to sab khate.</p>
         </div>
     </header>
 
-    <!-- Sticky Category Filter Bar -->
     <div id="category-bar-container" class="sticky top-0 bg-white shadow-md z-20 py-2">
-        <div id="category-filters" class="flex justify-center items-center space-x-2 px-4 overflow-x-auto no-scrollbar">
-            <!-- Category buttons will be dynamically inserted here -->
-        </div>
+        <div id="category-filters" class="flex justify-center items-center space-x-2 px-4 overflow-x-auto no-scrollbar"></div>
     </div>
 
-    <!-- Main Content -->
     <main class="p-4 max-w-3xl mx-auto pb-24">
-        <!-- Product Grid -->
-        <div id="product-grid" class="grid grid-cols-1 gap-4">
-            <!-- Products will be dynamically inserted here -->
-        </div>
+        <div id="product-grid" class="grid grid-cols-1 gap-4"></div>
     </main>
 
-    <!-- Floating Cart / Bottom Bar -->
     <div id="cart-container" class="fixed bottom-4 right-4 z-30 transition-all duration-300">
-        <!-- Floating button -->
         <button id="cart-button" class="bg-orange-500 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             <span id="cart-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">0</span>
         </button>
-        
-        <!-- Bottom bar -->
         <div id="cart-bar" class="hidden fixed bottom-0 left-0 right-0 bg-orange-500 text-white p-3 shadow-lg flex justify-between items-center transform translate-y-full transition-transform duration-300">
-             <div>
-                <p id="cart-bar-items" class="font-bold">0 Items</p>
-                <p id="cart-bar-total" class="text-sm">₹0.00</p>
-             </div>
+             <div><p id="cart-bar-items" class="font-bold">0 Items</p><p id="cart-bar-total" class="text-sm">₹0.00</p></div>
              <button id="view-cart-btn" class="bg-white text-orange-500 font-bold py-2 px-6 rounded-md">View Cart</button>
         </div>
     </div>
 
-    <!-- Product Detail Modal -->
     <div id="product-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end justify-center">
-        <div id="product-detail-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] flex flex-col">
-            <!-- Modal content will be dynamically inserted here -->
-        </div>
+        <div id="product-detail-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] flex flex-col"></div>
     </div>
-
-    <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex items-end justify-center">
         <div id="cart-modal-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl p-4 transform translate-y-full transition-transform duration-300 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center border-b pb-3 mb-3">
                 <h2 class="text-2xl font-bold text-gray-800">Your Order</h2>
-                <button id="close-cart-modal-btn" class="text-gray-500 hover:text-gray-800">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button id="close-cart-modal-btn" class="text-gray-500 hover:text-gray-800"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
-
-            <!-- Customer Details -->
             <div class="bg-white p-4 rounded-lg shadow mb-4">
                  <h3 class="font-bold text-lg mb-2 text-gray-700">Your Details</h3>
-                 <input type="text" id="customer-name" placeholder="Enter your name" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
-                 <textarea id="customer-address" placeholder="Enter your delivery address" rows="2" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"></textarea>
-                 <button id="get-location-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Use My Current Location
-                 </button>
+                 <input type="text" id="customer-name" placeholder="* Enter your name" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+                 <input type="tel" id="customer-contact" placeholder="* Enter your WhatsApp number (10 digits)" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+                 <textarea id="customer-address" placeholder="* Enter your delivery address" rows="2" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"></textarea>
+                 <button id="get-location-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition flex items-center justify-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Use My Current Location</button>
+                 <input type="hidden" id="customer-location">
             </div>
-
-            <!-- Cart Items -->
-            <div id="cart-items-list" class="flex-grow overflow-y-auto space-y-3">
-                <!-- Cart items will be dynamically inserted here -->
-            </div>
-            
-            <!-- Empty Cart Message -->
-             <div id="empty-cart-message" class="hidden text-center py-10">
-                <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                <h3 class="mt-4 text-xl font-semibold text-gray-500">Your cart is empty</h3>
-                <p class="text-gray-400">Add items from the menu to get started!</p>
-            </div>
-
-            <!-- Order Summary and Checkout -->
+            <div id="cart-items-list" class="flex-grow overflow-y-auto space-y-3"></div>
+            <div id="empty-cart-message" class="hidden text-center py-10"><svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg><h3 class="mt-4 text-xl font-semibold text-gray-500">Your cart is empty</h3><p class="text-gray-400">Add items from the menu to get started!</p></div>
             <div class="mt-auto border-t pt-4">
-                <div class="flex justify-between items-center text-lg font-bold text-gray-800">
-                    <span>Total Amount</span>
-                    <span id="cart-total">₹0.00</span>
-                </div>
-                <button id="place-order-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 px-4 rounded-lg mt-4 hover:bg-green-600 transition shadow-lg">
-                    Place Order on WhatsApp
-                </button>
+                <div class="flex justify-between items-center text-lg font-bold text-gray-800"><span>Total Amount</span><span id="cart-total">₹0.00</span></div>
+                <button id="proceed-to-pay-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 px-4 rounded-lg mt-4 hover:bg-green-600 transition shadow-lg flex items-center justify-center">Proceed to Pay</button>
             </div>
         </div>
     </div>
-
-    <!-- Custom Message Box -->
-    <div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10">
-        <p id="message-text"></p>
-    </div>
+    <div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center"><div class="loader"></div><p class="text-white text-lg mt-4">Processing your order...</p></div>
+    <div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10"><p id="message-text"></p></div>
 
 <script>
     // --- CONFIGURATION ---
-    const WHATSAPP_BUSINESS_NUMBER = '910000000000'; // IMPORTANT: Replace with your number (e.g., 91 for India)
-    const STORE_NAME = 'Your Awesome Store';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjujj6ixAUQZPWfjX8-S2ffFsNcHiZuJljT8bpLmxnNf_SPh2CRnCQdzS9E68v_Q3yCg/exec';
+    const STORE_NAME = 'MASKAARI';
 
     // --- MENU DATA ---
-    const menuData = {
-      "categories": [
-        { "id": "beverages", "name": "Beverages" },
-        { "id": "quick-bites", "name": "Quick Bites" },
-        { "id": "sides", "name": "Sides" }
-      ],
-      "products": [
-        // Beverages
-        { "id": "prod_001", "category": "beverages", "name": "Irani Chai", "description": "Indulge in the authentic taste of Hyderabad with our classic Irani Chai. This rich, creamy, and strong tea is slow-brewed for hours, creating a uniquely satisfying and comforting experience in every single sip.\n\nIngredients: Tea Decoction, Milk, Sugar, Special Spices, Condensed Milk, Milk Powder, Cream.", "price": 35.00, "image": "https://i.postimg.cc/KYxCfCqN/steaming-cup-coffee-with-cinnamon-sticks-star-anise-coffee-beans-dark-background-9975-124681.avif", "type": "veg" },
-        { "id": "prod_002", "category": "beverages", "name": "Subza Lemon Tea", "description": "A delightfully refreshing and zesty beverage perfect for any time of day. Our lemon tea is infused with healthy basil seeds (subza) for a unique texture and a cool, invigorating finish.\n\nIngredients: Black Tea, Fresh Lemon Juice, Sugar, Basil Seeds (Subza), Black Salt, Spices.", "price": 40.00, "image": "https://i.postimg.cc/Gm5q8V0t/image.png", "type": "veg" },
-
-        // Quick Bites
-        { "id": "prod_003", "category": "quick-bites", "name": "Bun Muska", "description": "The ultimate comfort snack, our Bun Muska is a soft, fluffy bun generously slathered with creamy butter.Perfectly simple and delicious, it's the ideal companion for a hot cup of Irani Chai.\n\nIngredients: Milk Bun, White Amul Butter, Full Cream.", "price": 50.00, "image": "https://i.postimg.cc/zXhBY1xF/Unknown.jpg", "type": "veg" },
-        { "id": "prod_004", "category": "quick-bites", "name": "Salted Fries", "description": "The timeless classic, done right. Our fries are cooked to a perfect golden crisp and lightly seasoned with salt, making them the ultimate satisfying snack for any craving.\n\nIngredients: Potatoes, Vegetable Oil, Salt.", "price": 69.00, "image": "https://i.postimg.cc/GmHjCKBC/image.png", "type": "veg" },
-        { "id": "prod_005", "category": "quick-bites", "name": "Peri-Peri Fries", "description": "Turn up the heat with our addictive Peri Peri Fries. Crispy golden fries are tossed in a fiery and tangy Peri Peri seasoning for a flavour explosion in every single bite.\n\nIngredients: Potatoes, Vegetable Oil, Peri Peri Seasoning, Salt.", "price": 79.00, "image": "https://i.postimg.cc/Qd2cr3GQ/image.png", "type": "veg" },
-        { "id": "prod_006", "category": "quick-bites", "name": "Cheesy Fries", "description": "A cheese lover's dream come true. Our perfectly crispy fries are generously drizzled with a warm, gooey, and savoury cheese sauce for an irresistibly indulgent treat.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Salt.", "price": 89.00, "image": "https://i.postimg.cc/3JWG4R3j/image.png", "type": "veg" },
-        { "id": "prod_007", "category": "quick-bites", "name": "Loaded Fries", "description": "Why settle for less when you can have it all? Our Loaded Fries are an epic feast, featuring crispy fries smothered in cheese sauce, zesty mayonnaise, and fresh toppings.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Mayonnaise, Chopped Onions, Tomatoes, Salt, Flavoured Sauces.", "price": 109.00, "image": "https://i.postimg.cc/ZRTBTYfd/image.png", "type": "veg" },
-        { "id": "prod_008", "category": "quick-bites", "name": "Malai Rusk", "description": "A decadent twist on the classic tea-time snack. Our crunchy rusk is generously topped with a rich, sweet, and creamy layer of malai, creating a truly luxurious bite.\n\nIngredients: Hard-baked Rusk, Malai (Fresh Cream), Black Pepper, Salt.", "price": 19.00, "priceUnit": "1", "image": "https://i.postimg.cc/Wbrk6yJt/image.png", "type": "veg" },
-        
-        // Sides
-        { "id": "prod_010", "category": "sides", "name": "Rusk", "description": "The quintessential tea-time companion. Our classic rusk is perfectly twice-baked for an unbeatable crunch, making it ideal for dipping into your favourite cup of chai.\n\nIngredients: Refined Wheat Flour, Sugar, Yeast, Vegetable Oil, Cardamom.", "price": 10.00, "priceUnit": "2", "image": "https://i.postimg.cc/jqf5G7qF/image.png", "type": "veg" },
-        { "id": "prod_011", "category": "sides", "name": "Osmania Biscuit", "description": "A true icon of Hyderabad, the Osmania Biscuit is a melt-in-your-mouth delight. Its unique taste, a perfect balance of sweet and salty with a buttery texture, makes it an unforgettable treat.\n\nIngredients: Refined Flour, Butter, Sugar, Milk Solids, Salt, Cardamom.", "price": 10.00, "priceUnit": "2", "image": "https://i.postimg.cc/Mp6pM37C/image.png", "type": "veg" },
-        { "id": "prod_012", "category": "sides", "name": "Fruit Biscuit", "description": "A nostalgic and delightful treat for all ages. Our buttery, crumbly biscuits are packed with sweet and chewy pieces of tutti-frutti, adding a burst of fruity flavour to every bite.\n\nIngredients: Refined Flour, Butter, Sugar, Tutti-Frutti (Candied Fruits), Milk.", "price": 19.00, "priceUnit": "2", "image": "https://i.postimg.cc/0yXP6k2S/image.png", "type": "veg" }
-      ]
-    };
+    const menuData = {"categories":[{"id":"beverages","name":"Beverages"},{"id":"quick-bites","name":"Quick Bites"},{"id":"sides","name":"Sides"}],"products":[{"id":"prod_001","category":"beverages","name":"Irani Chai","description":"Indulge in the authentic taste of Hyderabad with our classic Irani Chai. This rich, creamy, and strong tea is slow-brewed for hours, creating a uniquely satisfying and comforting experience in every single sip.\n\nIngredients: Tea Decoction, Milk, Sugar, Special Spices, Condensed Milk, Milk Powder, Cream.","price":35.00,"image":"https://i.postimg.cc/KYxCfCqN/steaming-cup-coffee-with-cinnamon-sticks-star-anise-coffee-beans-dark-background-9975-124681.avif","type":"veg"},{"id":"prod_002","category":"beverages","name":"Subza Lemon Tea","description":"A delightfully refreshing and zesty beverage perfect for any time of day. Our lemon tea is infused with healthy basil seeds (subza) for a unique texture and a cool, invigorating finish.\n\nIngredients: Black Tea, Fresh Lemon Juice, Sugar, Basil Seeds (Subza), Black Salt, Spices.","price":40.00,"image":"https://i.postimg.cc/Gm5q8V0t/image.png","type":"veg"},{"id":"prod_003","category":"quick-bites","name":"Bun Muska","description":"The ultimate comfort snack, our Bun Muska is a soft, fluffy bun generously slathered with creamy butter.Perfectly simple and delicious, it's the ideal companion for a hot cup of Irani Chai.\n\nIngredients: Milk Bun, White Amul Butter, Full Cream.","price":50.00,"image":"https://i.postimg.cc/zXhBY1xF/Unknown.jpg","type":"veg"},{"id":"prod_004","category":"quick-bites","name":"Salted Fries","description":"The timeless classic, done right. Our fries are cooked to a perfect golden crisp and lightly seasoned with salt, making them the ultimate satisfying snack for any craving.\n\nIngredients: Potatoes, Vegetable Oil, Salt.","price":69.00,"image":"https://i.postimg.cc/GmHjCKBC/image.png","type":"veg"},{"id":"prod_005","category":"quick-bites","name":"Peri-Peri Fries","description":"Turn up the heat with our addictive Peri Peri Fries. Crispy golden fries are tossed in a fiery and tangy Peri Peri seasoning for a flavour explosion in every single bite.\n\nIngredients: Potatoes, Vegetable Oil, Peri Peri Seasoning, Salt.","price":79.00,"image":"https://i.postimg.cc/Qd2cr3GQ/image.png","type":"veg"},{"id":"prod_006","category":"quick-bites","name":"Cheesy Fries","description":"A cheese lover's dream come true. Our perfectly crispy fries are generously drizzled with a warm, gooey, and savoury cheese sauce for an irresistibly indulgent treat.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Salt.","price":89.00,"image":"https://i.postimg.cc/3JWG4R3j/image.png","type":"veg"},{"id":"prod_007","category":"quick-bites","name":"Loaded Fries","description":"Why settle for less when you can have it all? Our Loaded Fries are an epic feast, featuring crispy fries smothered in cheese sauce, zesty mayonnaise, and fresh toppings.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Mayonnaise, Chopped Onions, Tomatoes, Salt, Flavoured Sauces.","price":109.00,"image":"https://i.postimg.cc/ZRTBTYfd/image.png","type":"veg"},{"id":"prod_008","category":"quick-bites","name":"Malai Rusk","description":"A decadent twist on the classic tea-time snack. Our crunchy rusk is generously topped with a rich, sweet, and creamy layer of malai, creating a truly luxurious bite.\n\nIngredients: Hard-baked Rusk, Malai (Fresh Cream), Black Pepper, Salt.","price":19.00,"priceUnit":"1","image":"https://i.postimg.cc/Wbrk6yJt/image.png","type":"veg"},{"id":"prod_010","category":"sides","name":"Rusk","description":"The quintessential tea-time companion. Our classic rusk is perfectly twice-baked for an unbeatable crunch, making it ideal for dipping into your favourite cup of chai.\n\nIngredients: Refined Wheat Flour, Sugar, Yeast, Vegetable Oil, Cardamom.","price":10.00,"priceUnit":"2","image":"https://i.postimg.cc/jqf5G7qF/image.png","type":"veg"},{"id":"prod_011","category":"sides","name":"Osmania Biscuit","description":"A true icon of Hyderabad, the Osmania Biscuit is a melt-in-your-mouth delight. Its unique taste, a perfect balance of sweet and salty with a buttery texture, makes it an unforgettable treat.\n\nIngredients: Refined Flour, Butter, Sugar, Milk Solids, Salt, Cardamom.","price":10.00,"priceUnit":"2","image":"https://i.postimg.cc/Mp6pM37C/image.png","type":"veg"},{"id":"prod_012","category":"sides","name":"Fruit Biscuit","description":"A nostalgic and delightful treat for all ages. Our buttery, crumbly biscuits are packed with sweet and chewy pieces of tutti-frutti, adding a burst of fruity flavour to every bite.\n\nIngredients: Refined Flour, Butter, Sugar, Tutti-Frutti (Candied Fruits), Milk.","price":19.00,"priceUnit":"2","image":"https://i.postimg.cc/0yXP6k2S/image.png","type":"veg"}]};
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- STATE MANAGEMENT ---
-        let cart = {}; // { productId: quantity }
-        let products = [];
-        let categories = [];
+// --- FULL SCRIPT FOR WEBSITE FUNCTIONALITY ---
+document.addEventListener('DOMContentLoaded', () => {
+    let cart = {}; let products = []; let categories = [];
+    const categoryFilters = document.getElementById('category-filters');
+    const productGrid = document.getElementById('product-grid');
+    const cartButton = document.getElementById('cart-button');
+    const cartCount = document.getElementById('cart-count');
+    const cartBar = document.getElementById('cart-bar');
+    const cartBarItems = document.getElementById('cart-bar-items');
+    const cartBarTotal = document.getElementById('cart-bar-total');
+    const viewCartBtn = document.getElementById('view-cart-btn');
+    const productDetailModal = document.getElementById('product-detail-modal');
+    const productDetailContent = document.getElementById('product-detail-content');
+    const cartModal = document.getElementById('cart-modal');
+    const cartModalContent = document.getElementById('cart-modal-content');
+    const closeCartModalBtn = document.getElementById('close-cart-modal-btn');
+    const cartItemsList = document.getElementById('cart-items-list');
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+    const cartTotalSpan = document.getElementById('cart-total');
+    const proceedToPayBtn = document.getElementById('proceed-to-pay-btn');
+    const customerNameInput = document.getElementById('customer-name');
+    const customerContactInput = document.getElementById('customer-contact');
+    const customerAddressInput = document.getElementById('customer-address');
+    const customerLocationInput = document.getElementById('customer-location');
+    const getLocationBtn = document.getElementById('get-location-btn');
+    const storeNameBanner = document.getElementById('store-name-banner');
+    const loadingModal = document.getElementById('loading-modal');
 
-        // --- DOM ELEMENT SELECTORS ---
-        const categoryFilters = document.getElementById('category-filters');
-        const productGrid = document.getElementById('product-grid');
-        const cartButton = document.getElementById('cart-button');
-        const cartCount = document.getElementById('cart-count');
-        const cartBar = document.getElementById('cart-bar');
-        const cartBarItems = document.getElementById('cart-bar-items');
-        const cartBarTotal = document.getElementById('cart-bar-total');
-        const viewCartBtn = document.getElementById('view-cart-btn');
+    async function handlePayment() {
+        const name = customerNameInput.value.trim();
+        const contact = customerContactInput.value.trim();
+        const address = customerAddressInput.value.trim();
+        const location = customerLocationInput.value;
+        if (Object.keys(cart).length === 0) { showMessage("Your cart is empty!"); return; }
+        if (!name) { showMessage("Please enter your name."); customerNameInput.focus(); return; }
+        if (!contact || !/^\d{10}$/.test(contact)) { showMessage("Please enter a valid 10-digit WhatsApp number."); customerContactInput.focus(); return; }
+        if (!address) { showMessage("Please enter your address."); customerAddressInput.focus(); return; }
+        if (!location) { showMessage("Please enable location for ordering."); return; }
         
-        const productDetailModal = document.getElementById('product-detail-modal');
-        const productDetailContent = document.getElementById('product-detail-content');
-
-        const cartModal = document.getElementById('cart-modal');
-        const cartModalContent = document.getElementById('cart-modal-content');
-        const closeCartModalBtn = document.getElementById('close-cart-modal-btn');
-        const cartItemsList = document.getElementById('cart-items-list');
-        const emptyCartMessage = document.getElementById('empty-cart-message');
-        const cartTotal = document.getElementById('cart-total');
-        const placeOrderBtn = document.getElementById('place-order-btn');
-        const customerNameInput = document.getElementById('customer-name');
-        const customerAddressInput = document.getElementById('customer-address');
-        const getLocationBtn = document.getElementById('get-location-btn');
-        const storeNameBanner = document.getElementById('store-name-banner');
+        loadingModal.classList.remove('hidden');
         
-        // --- INITIALIZATION ---
-        function initializeStore() {
-            products = menuData.products;
-            categories = menuData.categories;
-            storeNameBanner.textContent = STORE_NAME;
-
-            renderCategories();
-            renderProducts('all');
-            loadCartFromStorage();
-            loadCustomerDetails();
-            updateCart();
-        }
-
-        // --- RENDERING FUNCTIONS ---
-        function renderCategories() {
-            categoryFilters.innerHTML = ''; // Clear existing
-            
-            const allBtn = document.createElement('button');
-            allBtn.className = 'category-btn active text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';
-            allBtn.textContent = 'All';
-            allBtn.dataset.filter = 'all';
-            categoryFilters.appendChild(allBtn);
-
-            categories.forEach(category => {
-                const button = document.createElement('button');
-                button.className = 'category-btn text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';
-                button.textContent = category.name;
-                button.dataset.filter = category.id;
-                categoryFilters.appendChild(button);
+        const totalPrice = calculateTotalPrice();
+        const cartDetails = {};
+        Object.entries(cart).forEach(([id, qty]) => {
+            const product = getProductById(id);
+            if(product) cartDetails[product.name] = { quantity: qty, price: product.price };
+        });
+        
+        const returnUrl = window.location.href.split('?')[0].replace(/index\.html$/, '') + 'success.html';
+        
+        const orderPayload = { 
+            action: 'createOrder', 
+            total: totalPrice, 
+            cart: cartDetails, 
+            customer: { name, contact, address, location }, 
+            return_url: returnUrl 
+        };
+        
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(orderPayload)
             });
+
+            if (!response.ok) {
+                 throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+
+            if (result.success && result.payment_session_id) {
+                initiateCashfreeCheckout(result.payment_session_id);
+            } else {
+                throw new Error(result.error || 'Failed to create order from server.');
+            }
+        } catch (error) {
+            console.error('Error creating order:', error);
+            showMessage('Could not connect to the server. Please check your script and try again.');
+            loadingModal.classList.add('hidden');
         }
-
-        function renderProducts(filter = 'all') {
-            productGrid.innerHTML = '';
-            const filteredProducts = filter === 'all' 
-                ? products 
-                : products.filter(p => p.category === filter);
-
-            filteredProducts.forEach(product => {
-                const card = document.createElement('div');
-                card.className = 'product-card flex h-36 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';
-                card.dataset.productId = product.id;
-                
-                let typeIcon = '';
-                if (product.type === 'veg') {
-                    typeIcon = `<div class="w-5 h-5 border border-green-600 flex items-center justify-center mr-2"><div class="w-3 h-3 bg-green-600 rounded-full"></div></div>`;
-                } else if (product.type === 'non-veg') {
-                    typeIcon = `<div class="w-5 h-5 border border-red-600 flex items-center justify-center mr-2"><div class="w-0 h-0 border-l-[6px] border-l-transparent border-t-[9px] border-t-red-600 border-r-[6px] border-r-transparent"></div></div>`;
+    }
+    
+    function initiateCashfreeCheckout(paymentSessionId) {
+        loadingModal.classList.add('hidden');
+        const cashfree = new Cashfree({ mode: "production" }); 
+        cashfree.checkout({ paymentSessionId: paymentSessionId })
+            .then((result) => {
+                if (result.error) {
+                    showMessage("Payment failed: " + result.error.message);
+                    console.error("Cashfree error:", result.error);
                 }
-
-                const priceHTML = product.priceUnit
-                    ? `<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>`
-                    : `<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(2)}</span>`;
-
-                card.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}" class="w-32 h-full object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';">
-                    <div class="p-3 flex flex-col flex-grow">
-                        <div class="flex items-center">
-                            ${typeIcon}
-                            <h3 class="font-semibold text-gray-800">${product.name}</h3>
-                        </div>
-                        <div class="mt-1 flex-grow">
-                             <p class="text-sm text-gray-500 truncate-2-lines">${product.description.split('\n\n')[0]}</p>
-                        </div>
-                        <div class="flex justify-between items-center mt-auto pt-2">
-                            ${priceHTML}
-                            <div class="product-action"></div>
-                        </div>
-                    </div>
-                `;
-                productGrid.appendChild(card);
-                updateProductCard(product.id);
+                if (result.redirect) {
+                    console.log("Redirecting to success page via Cashfree.");
+                }
             });
-        }
+    }
 
-        function updateProductCard(productId) {
-            const card = productGrid.querySelector(`.product-card[data-product-id="${productId}"]`);
-            if (!card) return;
-
-            const actionContainer = card.querySelector('.product-action');
-            const quantity = cart[productId] || 0;
-            
-            card.classList.toggle('ring-2', quantity > 0);
-            card.classList.toggle('ring-orange-400', quantity > 0);
-
-            if (quantity === 0) {
-                actionContainer.innerHTML = `<button data-product-id="${productId}" class="add-btn text-orange-500 border border-orange-500 font-bold text-sm py-2 px-6 rounded-md hover:bg-orange-500 hover:text-white transition-all duration-200">ADD</button>`;
-            } else {
-                actionContainer.innerHTML = `
-                    <div class="flex items-center justify-center border border-orange-500 rounded-md">
-                        <button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">-</button>
-                        <span class="font-bold text-orange-500 px-2">${quantity}</span>
-                        <button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">+</button>
-                    </div>
-                `;
-            }
-        }
-        
-        // --- CART LOGIC ---
-        function addToCart(productId) {
-            cart[productId] = (cart[productId] || 0) + 1;
-            updateCart();
-            showMessage(`${getProductById(productId).name} added to cart`);
-        }
-
-        function changeQuantity(productId, amount) {
-            if (cart[productId]) {
-                cart[productId] += amount;
-                if (cart[productId] <= 0) {
-                    delete cart[productId];
-                     showMessage(`${getProductById(productId).name} removed from cart`);
-                }
-                updateCart();
-            }
-        }
-
-        function updateCart() {
-            saveCartToStorage();
-            const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-            const totalPrice = Object.entries(cart).reduce((sum, [id, qty]) => {
-                const product = getProductById(id);
-                return sum + (product ? product.price * qty : 0);
-            }, 0);
-
-            cartCount.textContent = totalItems;
-            
-            if (totalItems > 0) {
-                cartButton.classList.add('hidden');
-                cartBar.classList.remove('hidden');
-                setTimeout(() => cartBar.classList.remove('translate-y-full'), 10);
-                cartBarItems.textContent = `${totalItems} ${totalItems > 1 ? 'Items' : 'Item'}`;
-                cartBarTotal.textContent = `₹${totalPrice.toFixed(2)}`;
-            } else {
-                cartButton.classList.remove('hidden');
-                cartBar.classList.add('translate-y-full');
-                setTimeout(() => cartBar.classList.add('hidden'), 300);
-            }
-
-            updateCartModal(totalPrice);
-            
-            products.forEach(p => updateProductCard(p.id));
-        }
-
-        function updateCartModal(totalPrice) {
-            cartItemsList.innerHTML = '';
-            const cartEntries = Object.entries(cart);
-
-            if (cartEntries.length === 0) {
-                emptyCartMessage.classList.remove('hidden');
-            } else {
-                emptyCartMessage.classList.add('hidden');
-                cartEntries.forEach(([id, qty]) => {
-                    const product = getProductById(id);
-                    if (product) {
-                        const itemElement = document.createElement('div');
-                        itemElement.className = 'flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';
-                        
-                        const typeIcon = product.type === 'veg' 
-                        ? `<div class="w-4 h-4 border border-green-600 flex items-center justify-center mr-2 flex-shrink-0"><div class="w-2 h-2 bg-green-600 rounded-full"></div></div>`
-                        : `<div class="w-4 h-4 border border-red-600 flex items-center justify-center mr-2 flex-shrink-0"><div class="w-0 h-0 border-l-[4px] border-l-transparent border-t-[6px] border-t-red-600 border-r-[4px] border-r-transparent"></div></div>`;
-
-                        const cartItemPriceHTML = product.priceUnit
-                            ? `<p class="text-sm text-gray-600">₹${product.price.toFixed(0)} / ${product.priceUnit}</p>`
-                            : `<p class="text-sm text-gray-600">₹${product.price.toFixed(2)}</p>`;
-
-                        itemElement.innerHTML = `
-                            <div class="flex items-center flex-1 min-w-0">
-                                ${typeIcon}
-                                <div class="flex-grow min-w-0">
-                                    <p class="font-semibold text-gray-800 truncate">${product.name}</p>
-                                    ${cartItemPriceHTML}
-                                </div>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="flex items-center justify-center border border-gray-300 rounded-md">
-                                    <button data-product-id="${id}" class="quantity-change-btn text-gray-700 w-8 h-8 flex items-center justify-center font-bold text-lg">-</button>
-                                    <span class="font-bold text-gray-800 px-2">${qty}</span>
-                                    <button data-product-id="${id}" class="quantity-change-btn text-gray-700 w-8 h-8 flex items-center justify-center font-bold text-lg">+</button>
-                                </div>
-                                <span class="font-bold text-gray-800 w-20 text-right">₹${(product.price * qty).toFixed(2)}</span>
-                            </div>
-                        `;
-                        cartItemsList.appendChild(itemElement);
-                    }
-                });
-            }
-            cartTotal.textContent = `₹${totalPrice.toFixed(2)}`;
-        }
-        
-        // --- MODAL & UI ---
-        function openCartModal() {
-            cartModal.classList.remove('hidden');
-            setTimeout(() => cartModalContent.classList.remove('translate-y-full'), 10);
-        }
-
-        function closeCartModal() {
-            cartModalContent.classList.add('translate-y-full');
-            setTimeout(() => cartModal.classList.add('hidden'), 300);
-        }
-
-        function openProductDetailModal(productId) {
-            const product = getProductById(productId);
-            if (!product) return;
-
-            productDetailContent.innerHTML = ''; // Clear previous content
-
-            const quantity = cart[productId] || 0;
-            let actionHtml = '';
-
-            if (quantity === 0) {
-                actionHtml = `<button data-product-id="${productId}" class="add-btn flex-1 bg-orange-500 text-white text-lg font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition shadow-lg">ADD TO CART</button>`;
-            } else {
-                actionHtml = `
+    function initializeStore(){products=menuData.products;categories=menuData.categories;storeNameBanner.textContent=STORE_NAME;const bannerTagline=document.getElementById('store-tagline-banner');bannerTagline.textContent="Muska hai Boss! Plain to sab khate.";const bannerImg=document.querySelector('header img');bannerImg.src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI";renderCategories();renderProducts('all');loadCartFromStorage();loadCustomerDetails();updateCart();}
+    function renderCategories(){categoryFilters.innerHTML='';const allBtn=document.createElement('button');allBtn.className='category-btn active text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';allBtn.textContent='All';allBtn.dataset.filter='all';categoryFilters.appendChild(allBtn);categories.forEach(category=>{const button=document.createElement('button');button.className='category-btn text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';button.textContent=category.name;button.dataset.filter=category.id;categoryFilters.appendChild(button)})}
+    function renderProducts(filter='all'){productGrid.innerHTML='';const filteredProducts=filter==='all'?products:products.filter(p=>p.category===filter);filteredProducts.forEach(product=>{const card=document.createElement('div');card.className='product-card flex h-36 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';card.dataset.productId=product.id;const typeIcon=product.type==='veg'?`<div class="w-5 h-5 border border-green-600 flex items-center justify-center mr-2"><div class="w-3 h-3 bg-green-600 rounded-full"></div></div>`:`<div class="w-5 h-5 border border-red-600 flex items-center justify-center mr-2"><div class="w-0 h-0 border-l-[6px] border-l-transparent border-t-[9px] border-t-red-600 border-r-[6px] border-r-transparent"></div></div>`;const priceHTML=product.priceUnit?`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>`:`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(2)}</span>`;card.innerHTML=`
+                <img src="${product.image}" alt="${product.name}" class="w-32 h-full object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';">
+                <div class="p-3 flex flex-col flex-grow">
+                    <div class="flex items-center">${typeIcon}<h3 class="font-semibold text-gray-800">${product.name}</h3></div>
+                    <div class="mt-1 flex-grow"><p class="text-sm text-gray-500 truncate-2-lines">${product.description.split('\n\n')[0]}</p></div>
+                    <div class="flex justify-between items-center mt-auto pt-2">${priceHTML}<div class="product-action"></div></div>
+                </div>`;productGrid.appendChild(card);updateProductCard(product.id)})}
+    function updateProductCard(productId){const card=productGrid.querySelector(`.product-card[data-product-id="${productId}"]`);if(!card)return;const actionContainer=card.querySelector('.product-action');const quantity=cart[productId]||0;card.classList.toggle('ring-2',quantity>0);card.classList.toggle('ring-orange-400',quantity>0);if(quantity===0){actionContainer.innerHTML=`<button data-product-id="${productId}" class="add-btn text-orange-500 border border-orange-500 font-bold text-sm py-2 px-6 rounded-md hover:bg-orange-500 hover:text-white transition-all duration-200">ADD</button>`}else{actionContainer.innerHTML=`<div class="flex items-center justify-center border border-orange-500 rounded-md"><button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">-</button><span class="font-bold text-orange-500 px-2">${quantity}</span><button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">+</button></div>`}}
+    function addToCart(productId){cart[productId]=(cart[productId]||0)+1;updateCart();showMessage(`${getProductById(productId).name} added to cart`)}
+    function changeQuantity(productId,amount){if(cart[productId]){cart[productId]+=amount;if(cart[productId]<=0){delete cart[productId];showMessage(`${getProductById(productId).name} removed from cart`)}
+updateCart()}}
+    function calculateTotalPrice(){return Object.entries(cart).reduce((sum,[id,qty])=>{const product=getProductById(id);return sum+(product?product.price*qty:0)},0)}
+    function updateCart(){saveCartToStorage();const totalItems=Object.values(cart).reduce((sum,qty)=>sum+qty,0);const totalPrice=calculateTotalPrice();cartCount.textContent=totalItems;if(totalItems>0){cartButton.classList.add('hidden');cartBar.classList.remove('hidden');setTimeout(()=>cartBar.classList.remove('translate-y-full'),10);cartBarItems.textContent=`${totalItems} ${totalItems>1?'Items':'Item'}`;cartBarTotal.textContent=`₹${totalPrice.toFixed(2)}`}else{cartButton.classList.remove('hidden');cartBar.classList.add('translate-y-full');setTimeout(()=>cartBar.classList.add('hidden'),300)}
+updateCartModal(totalPrice);products.forEach(p=>updateProductCard(p.id))}
+    function updateCartModal(totalPrice){cartItemsList.innerHTML='';const cartEntries=Object.entries(cart);if(cartEntries.length===0){emptyCartMessage.classList.remove('hidden')}else{emptyCartMessage.classList.add('hidden');cartEntries.forEach(([id,qty])=>{const product=getProductById(id);if(product){const itemElement=document.createElement('div');itemElement.className='flex items-center justify-between bg-white p-3 rounded-lg shadow-sm';const typeIcon=product.type==='veg'?`<div class="w-4 h-4 border border-green-600 flex items-center justify-center mr-2 flex-shrink-0"><div class="w-2 h-2 bg-green-600 rounded-full"></div></div>`:`<div class="w-4 h-4 border border-red-600 flex items-center justify-center mr-2 flex-shrink-0"><div class="w-0 h-0 border-l-[4px] border-l-transparent border-t-[6px] border-t-red-600 border-r-[4px] border-r-transparent"></div></div>`;const cartItemPriceHTML=product.priceUnit?`<p class="text-sm text-gray-600">₹${product.price.toFixed(0)} / ${product.priceUnit}</p>`:`<p class="text-sm text-gray-600">₹${product.price.toFixed(2)}</p>`;itemElement.innerHTML=`<div class="flex items-center flex-1 min-w-0">${typeIcon}<div class="flex-grow min-w-0"><p class="font-semibold text-gray-800 truncate">${product.name}</p>${cartItemPriceHTML}</div></div><div class="flex items-center"><div class="flex items-center justify-center border border-gray-300 rounded-md"><button data-product-id="${id}" class="quantity-change-btn text-gray-700 w-8 h-8 flex items-center justify-center font-bold text-lg">-</button><span class="font-bold text-gray-800 px-2">${qty}</span><button data-product-id="${id}" class="quantity-change-btn text-gray-700 w-8 h-8 flex items-center justify-center font-bold text-lg">+</button></div><span class="font-bold text-gray-800 w-20 text-right">₹${(product.price*qty).toFixed(2)}</span></div>`;cartItemsList.appendChild(itemElement)}})}
+cartTotalSpan.textContent=`₹${totalPrice.toFixed(2)}`}
+    function openCartModal(){cartModal.classList.remove('hidden');setTimeout(()=>cartModalContent.classList.remove('translate-y-full'),10)}
+    function closeCartModal(){cartModalContent.classList.add('translate-y-full');setTimeout(()=>cartModal.classList.add('hidden'),300)}
+    function openProductDetailModal(productId){ const product = getProductById(productId); if (!product) return; productDetailContent.innerHTML = ''; const quantity = cart[productId] || 0; let actionHtml = ''; if (quantity === 0) { actionHtml = `<button data-product-id="${productId}" class="add-btn flex-1 bg-orange-500 text-white text-lg font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition shadow-lg">ADD TO CART</button>`; } else { actionHtml = `
                     <div class="flex items-center justify-center border border-orange-500 rounded-lg flex-1">
                         <button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-1/3 h-12 flex items-center justify-center font-bold text-2xl">-</button>
                         <span class="font-bold text-orange-500 px-4 text-xl">${quantity}</span>
                         <button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-1/3 h-12 flex items-center justify-center font-bold text-2xl">+</button>
-                    </div>
-                `;
-            }
-            
-            // For displaying multiline description in modal
-            const formattedDescription = product.description.replace(/\n/g, '<br>');
-            
-            const modalPriceHTML = product.priceUnit
-                ? `<span class="text-2xl font-bold text-gray-800 flex-1">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>`
-                : `<span class="text-2xl font-bold text-gray-800 flex-1">₹${product.price.toFixed(2)}</span>`;
-
-            productDetailContent.innerHTML = `
+                    </div>`; }
+const modalPriceHTML = product.priceUnit ? `<span class="text-2xl font-bold text-gray-800 flex-1">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>` : `<span class="text-2xl font-bold text-gray-800 flex-1">₹${product.price.toFixed(2)}</span>`; productDetailContent.innerHTML = `
                 <img src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover rounded-t-2xl" onerror="this.onerror=null;this.src='https://placehold.co/600x400/CCCCCC/FFFFFF?text=Image+Not+Found';">
                 <div class="p-4 flex-grow flex flex-col overflow-y-auto">
                     <div class="flex justify-between items-start">
@@ -452,208 +231,57 @@
                         ${modalPriceHTML}
                         <div class="product-action-modal flex-1">${actionHtml}</div>
                     </div>
-                </div>
-            `;
-
-            productDetailModal.classList.remove('hidden');
-            setTimeout(() => productDetailContent.classList.remove('translate-y-full'), 10);
-
-            document.getElementById('close-product-modal-btn').addEventListener('click', closeProductDetailModal);
-        }
-
-        function closeProductDetailModal() {
-            productDetailContent.classList.add('translate-y-full');
-            setTimeout(() => {
-                productDetailModal.classList.add('hidden');
-                productDetailContent.innerHTML = '';
-            }, 300);
-        }
-
-
-        function showMessage(text) {
-            const messageBox = document.getElementById('message-box');
-            const messageText = document.getElementById('message-text');
-            
-            messageText.textContent = text;
-            messageBox.classList.remove('hidden');
-            setTimeout(() => {
-                messageBox.classList.remove('opacity-0', '-translate-y-10');
-            }, 10);
-
-            setTimeout(() => {
-                messageBox.classList.add('opacity-0', '-translate-y-10');
-                setTimeout(() => messageBox.classList.add('hidden'), 300);
-            }, 2000);
-        }
-
-        // --- DATA & HELPERS ---
-        function getProductById(id) {
-            return products.find(p => p.id === id);
-        }
-
-        // --- LOCAL STORAGE ---
-        function saveCartToStorage() {
-            localStorage.setItem('orderingAppCart', JSON.stringify(cart));
-        }
-
-        function loadCartFromStorage() {
-            const storedCart = localStorage.getItem('orderingAppCart');
-            if (storedCart) {
-                cart = JSON.parse(storedCart);
-            }
-        }
-        
-        function saveCustomerDetails() {
-            const details = {
-                name: customerNameInput.value,
-                address: customerAddressInput.value
-            };
-            localStorage.setItem('orderingAppCustomerDetails', JSON.stringify(details));
-        }
-
-        function loadCustomerDetails() {
-            const storedDetails = localStorage.getItem('orderingAppCustomerDetails');
-            if (storedDetails) {
-                const details = JSON.parse(storedDetails);
-                customerNameInput.value = details.name || '';
-                customerAddressInput.value = details.address || '';
-            }
-        }
-
-        // --- EVENT HANDLERS ---
-        categoryFilters.addEventListener('click', (e) => {
-            if (e.target.classList.contains('category-btn')) {
-                const currentActive = categoryFilters.querySelector('.category-btn.active');
-                if (currentActive) {
-                    currentActive.classList.remove('active');
-                }
-                e.target.classList.add('active');
-                const filter = e.target.dataset.filter;
-                renderProducts(filter);
-            }
-        });
-
-        productGrid.addEventListener('click', (e) => {
-            const card = e.target.closest('.product-card');
-            if (!card) return;
-
-            const productId = card.dataset.productId;
-            const actionButton = e.target.closest('.add-btn, .quantity-change-btn');
-
-            if (actionButton) {
-                // Click was on a button
-                if (actionButton.classList.contains('add-btn')) {
-                    addToCart(productId);
-                } else {
-                    const amount = actionButton.textContent === '+' ? 1 : -1;
-                    changeQuantity(productId, amount);
-                }
-            } else {
-                // Click was on the card itself
-                openProductDetailModal(productId);
-            }
-        });
-        
-        productDetailModal.addEventListener('click', (e) => {
-             if (e.target === productDetailModal) {
-                 closeProductDetailModal();
-                 return;
-             }
-             const button = e.target.closest('.add-btn, .quantity-change-btn');
-             if (button) {
-                const productId = button.dataset.productId;
-                if (button.classList.contains('add-btn')) {
-                    addToCart(productId);
-                } else {
-                    const amount = button.textContent === '+' ? 1 : -1;
-                    changeQuantity(productId, amount);
-                }
-                // Re-render the modal content to show updated quantity
-                openProductDetailModal(productId);
-            }
-        });
-
-        cartItemsList.addEventListener('click', (e) => {
-             let button = e.target.closest('.quantity-change-btn');
-             if (button) {
-                const productId = button.dataset.productId;
-                const amount = button.textContent === '+' ? 1 : -1;
-                changeQuantity(productId, amount);
-            }
-        });
-        
-        [cartButton, viewCartBtn].forEach(btn => btn.addEventListener('click', openCartModal));
-        closeCartModalBtn.addEventListener('click', closeCartModal);
-        cartModal.addEventListener('click', (e) => {
-            if (e.target === cartModal) closeCartModal();
-        });
-
-        [customerNameInput, customerAddressInput].forEach(input => {
-            input.addEventListener('input', saveCustomerDetails);
-        });
-
-        getLocationBtn.addEventListener('click', () => {
-            if (navigator.geolocation) {
-                showMessage("Fetching your location...");
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        customerAddressInput.value = `My current location: https://www.google.com/maps?q=${latitude},${longitude}`;
-                        saveCustomerDetails();
-                        showMessage("Location fetched successfully!");
-                    },
-                    (error) => {
-                         showMessage("Could not get location. Please enter manually.");
-                        console.error("Geolocation Error:", error);
+                </div>`; productDetailModal.classList.remove('hidden'); setTimeout(() => productDetailContent.classList.remove('translate-y-full'), 10); document.getElementById('close-product-modal-btn').addEventListener('click', closeProductDetailModal); }
+    function closeProductDetailModal(){productDetailContent.classList.add('translate-y-full');setTimeout(()=>{productDetailModal.classList.add('hidden');productDetailContent.innerHTML=''},300)}
+    function showMessage(text){const messageBox=document.getElementById('message-box');const messageText=document.getElementById('message-text');messageText.textContent=text;messageBox.classList.remove('hidden');setTimeout(()=>{messageBox.classList.remove('opacity-0','-translate-y-10')},10);setTimeout(()=>{messageBox.classList.add('opacity-0','-translate-y-10');setTimeout(()=>messageBox.classList.add('hidden'),300)},2000)}
+    function getProductById(id){return products.find(p=>p.id===id)}
+    function getInitialLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const locationString = `https://www.google.com/maps?q=${latitude},${longitude}`;
+                    customerLocationInput.value = locationString;
+                    showMessage("Location captured automatically!");
+                },
+                (error) => {
+                    let errorMessage = "Could not get location. Please enter your address manually.";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "Location access was denied. Please enable it in your browser settings.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "Location information is unavailable. Please try again later.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = "The request to get user location timed out. Please try again.";
+                            break;
                     }
-                );
-            } else {
-                showMessage("Geolocation is not supported by your browser.");
-            }
-        });
-
-        placeOrderBtn.addEventListener('click', () => {
-            const name = customerNameInput.value.trim();
-            const address = customerAddressInput.value.trim();
-
-            if (Object.keys(cart).length === 0) {
-                showMessage("Your cart is empty!");
-                return;
-            }
-            if (!name) {
-                showMessage("Please enter your name.");
-                customerNameInput.focus();
-                return;
-            }
-            if (!address) {
-                showMessage("Please enter your address or use location.");
-                customerAddressInput.focus();
-                return;
-            }
-            
-            let orderSummary = `Hello ${STORE_NAME}, I would like to place an order.\n\n*My Details:*\nName: ${name}\nAddress: ${address}\n\n*Order Summary:*\n`;
-            let totalPrice = 0;
-            
-            Object.entries(cart).forEach(([id, qty]) => {
-                const product = getProductById(id);
-                if (product) {
-                    orderSummary += `- ${product.name} (x${qty}) - ₹${(product.price * qty).toFixed(2)}\n`;
-                    totalPrice += product.price * qty;
+                    showMessage(errorMessage);
+                    console.error(`Geolocation Error (Code ${error.code}): ${error.message}`);
                 }
-            });
-            
-            orderSummary += `\n*Total Amount: ₹${totalPrice.toFixed(2)}*\n\nPlease confirm my order.`;
-            
-            const whatsappUrl = `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(orderSummary)}`;
-            window.open(whatsappUrl, '_blank');
-        });
-
-        // --- START THE APP ---
-        initializeStore();
-    });
+            );
+        } else {
+            showMessage("Geolocation is not supported by your browser.");
+        }
+    }
+    function saveCartToStorage(){localStorage.setItem('orderingAppCart',JSON.stringify(cart))}
+    function loadCartFromStorage(){const d=localStorage.getItem('orderingAppCart');if(d)cart=JSON.parse(d)}
+    function saveCustomerDetails(){const d={name:customerNameInput.value,contact:customerContactInput.value,address:customerAddressInput.value};localStorage.setItem('orderingAppCustomerDetails',JSON.stringify(d))}
+    function loadCustomerDetails(){const d=localStorage.getItem('orderingAppCustomerDetails');if(d){const p=JSON.parse(d);customerNameInput.value=p.name||'';customerContactInput.value=p.contact||'';customerAddressInput.value=p.address||''}}
+    categoryFilters.addEventListener('click',(e)=>{if(e.target.classList.contains('category-btn')){const a=categoryFilters.querySelector('.category-btn.active');if(a)a.classList.remove('active');e.target.classList.add('active');renderProducts(e.target.dataset.filter)}});
+    productGrid.addEventListener('click',(e)=>{const c=e.target.closest('.product-card');if(!c)return;const p=c.dataset.productId;const a=e.target.closest('.add-btn, .quantity-change-btn');if(a){if(a.classList.contains('add-btn')){addToCart(p)}else{const am=a.textContent==='+'?1:-1;changeQuantity(p,am)}}else{openProductDetailModal(p)}});
+    productDetailModal.addEventListener('click',(e)=>{if(e.target===productDetailModal){closeProductDetailModal();return}const b=e.target.closest('.add-btn, .quantity-change-btn');if(b){const p=b.dataset.productId;if(b.classList.contains('add-btn')){addToCart(p)}else{const am=b.textContent==='+'?1:-1;changeQuantity(p,am)}
+openProductDetailModal(p)}});
+    cartItemsList.addEventListener('click',(e)=>{let b=e.target.closest('.quantity-change-btn');if(b){changeQuantity(b.dataset.productId,b.textContent==='+'?1:-1)}});
+    [cartButton,viewCartBtn].forEach(b=>b.addEventListener('click',openCartModal));
+    closeCartModalBtn.addEventListener('click',closeCartModal);
+    cartModal.addEventListener('click',(e)=>{if(e.target===cartModal)closeCartModal()});
+    [customerNameInput,customerContactInput,customerAddressInput].forEach(i=>{i.addEventListener('input',saveCustomerDetails)});
+    getLocationBtn.addEventListener('click',getInitialLocation);
+    proceedToPayBtn.addEventListener('click',handlePayment);
+    initializeStore()});
 </script>
-
 </body>
 </html>
-
 
