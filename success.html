@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #4CAF50;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            margin: 10% auto;
+            box-shadow: inset 0px 0px 0px #4CAF50;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 50px #4CAF50;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen text-center p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+
+        <h1 class="text-3xl font-bold text-gray-800 mt-4">Order Confirmed!</h1>
+        <p class="text-gray-600 mt-2">Thank you for your purchase. Your order <strong id="order-id">#MASKAARI-XXX</strong> has been successfully placed.</p>
+        <p class="text-gray-500 mt-4">We've received your order details and will begin preparing it shortly. You will receive updates via WhatsApp.</p>
+        
+        <a href="index.html" class="mt-8 inline-block bg-orange-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-orange-600 transition">
+            Place Another Order
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderIdElement = document.getElementById('order-id');
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order_id');
+
+            if (orderId) {
+                orderIdElement.textContent = `#${orderId}`;
+                // Clear the cart from the previous order
+                localStorage.removeItem('orderingAppCart');
+            }
+
+            const backToStoreLink = document.querySelector('a');
+            backToStoreLink.href = window.location.href.replace(/success\.html.*$/, 'index.html');
+        });
+    </script>
+</body>
+</html>
+
