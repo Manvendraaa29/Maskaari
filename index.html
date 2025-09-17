@@ -30,22 +30,14 @@
             <h1 id="store-name-banner" class="text-3xl font-bold">MASKAARI</h1>
             <p id="store-tagline-banner" class="text-lg mt-1">Muska hai Boss! Plain to sab khate.</p>
         </div>
-        <!-- Active Orders Button -->
-        <button id="active-orders-btn" class="hidden absolute top-4 right-4 z-30 bg-white/90 text-blue-600 font-semibold py-2 px-4 rounded-full shadow-lg flex items-center backdrop-blur-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-            Active Orders
-        </button>
     </header>
     
-    <!-- Active Orders Panel -->
     <div id="active-orders-panel" class="fixed top-0 right-0 h-full w-full max-w-sm bg-gray-100 shadow-xl z-50 transform translate-x-full p-4 flex flex-col">
         <div class="flex justify-between items-center mb-4 border-b pb-2">
             <h2 class="text-2xl font-bold text-gray-800">Your Active Orders</h2>
             <button id="close-orders-panel-btn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
         </div>
-        <div id="active-orders-list" class="flex-grow overflow-y-auto space-y-4">
-            <!-- Active orders from localStorage will be loaded here -->
-        </div>
+        <div id="active-orders-list" class="flex-grow overflow-y-auto space-y-4"></div>
     </div>
 
     <div id="category-bar-container" class="sticky top-0 bg-white shadow-md z-20 py-2">
@@ -56,7 +48,12 @@
         <div id="product-grid" class="grid grid-cols-1 gap-4"></div>
     </main>
 
-    <!-- Bottom Cart Bar (replaces floating button) -->
+    <!-- Floating "Active Orders" Button -->
+    <button id="active-orders-btn" class="hidden fixed bottom-4 right-4 z-30 bg-blue-600 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
+    </button>
+
+    <!-- Bottom Cart Bar -->
     <div id="cart-bar" class="hidden fixed bottom-0 left-0 right-0 bg-orange-500 text-white p-3 shadow-lg flex justify-between items-center transform translate-y-full transition-transform duration-300">
          <div><p id="cart-bar-items" class="font-bold">0 Items</p><p id="cart-bar-total" class="text-sm">₹0.00</p></div>
          <button id="view-cart-btn" class="bg-white text-orange-500 font-bold py-2 px-6 rounded-md">View Cart</button>
@@ -70,21 +67,21 @@
 <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjujj6ixAUQZPWfjX8-S2ffFsNcHiZuJljT8bpLmxnNf_SPh2CRnCQdzS9E68v_Q3yCg/exec';
     const STORE_NAME = 'MASKAARI';
-    const BUSINESS_WHATSAPP_NUMBER = '916387936753'; // Your business WhatsApp number for contact
+    const BUSINESS_WHATSAPP_NUMBER = '916387936753';
     const menuData = {"categories":[{"id":"beverages","name":"Beverages"},{"id":"quick-bites","name":"Quick Bites"},{"id":"sides","name":"Sides"}],"products":[{"id":"prod_001","category":"beverages","name":"Irani Chai","description":"Indulge in the authentic taste of Hyderabad with our classic Irani Chai. This rich, creamy, and strong tea is slow-brewed for hours, creating a uniquely satisfying and comforting experience in every single sip.\n\nIngredients: Tea Decoction, Milk, Sugar, Special Spices, Condensed Milk, Milk Powder, Cream.","price":1.00,"image":"https://i.postimg.cc/KYxCfCqN/steaming-cup-coffee-with-cinnamon-sticks-star-anise-coffee-beans-dark-background-9975-124681.avif","type":"veg"},{"id":"prod_002","category":"beverages","name":"Subza Lemon Tea","description":"A delightfully refreshing and zesty beverage perfect for any time of day. Our lemon tea is infused with healthy basil seeds (subza) for a unique texture and a cool, invigorating finish.\n\nIngredients: Black Tea, Fresh Lemon Juice, Sugar, Basil Seeds (Subza), Black Salt, Spices.","price":40.00,"image":"https://i.postimg.cc/Gm5q8V0t/image.png","type":"veg"},{"id":"prod_003","category":"quick-bites","name":"Bun Muska","description":"The ultimate comfort snack, our Bun Muska is a soft, fluffy bun generously slathered with creamy butter.Perfectly simple and delicious, it's the ideal companion for a hot cup of Irani Chai.\n\nIngredients: Milk Bun, White Amul Butter, Full Cream.","price":50.00,"image":"https://i.postimg.cc/zXhBY1xF/Unknown.jpg","type":"veg"},{"id":"prod_004","category":"quick-bites","name":"Salted Fries","description":"The timeless classic, done right. Our fries are cooked to a perfect golden crisp and lightly seasoned with salt, making them the ultimate satisfying snack for any craving.\n\nIngredients: Potatoes, Vegetable Oil, Salt.","price":69.00,"image":"https://i.postimg.cc/GmHjCKBC/image.png","type":"veg"},{"id":"prod_005","category":"quick-bites","name":"Peri-Peri Fries","description":"Turn up the heat with our addictive Peri Peri Fries. Crispy golden fries are tossed in a fiery and tangy Peri Peri seasoning for a flavour explosion in every single bite.\n\nIngredients: Potatoes, Vegetable Oil, Peri Peri Seasoning, Salt.","price":79.00,"image":"https://i.postimg.cc/Qd2cr3GQ/image.png","type":"veg"},{"id":"prod_006","category":"quick-bites","name":"Cheesy Fries","description":"A cheese lover's dream come true. Our perfectly crispy fries are generously drizzled with a warm, gooey, and savoury cheese sauce for an irresistibly indulgent treat.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Salt.","price":89.00,"image":"https://i.postimg.cc/3JWG4R3j/image.png","type":"veg"},{"id":"prod_007","category":"quick-bites","name":"Loaded Fries","description":"Why settle for less when you can have it all? Our Loaded Fries are an epic feast, featuring crispy fries smothered in cheese sauce, zesty mayonnaise, and fresh toppings.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Mayonnaise, Chopped Onions, Tomatoes, Salt, Flavoured Sauces.","price":109.00,"image":"https://i.postimg.cc/ZRTBTYfd/image.png","type":"veg"},{"id":"prod_008","category":"quick-bites","name":"Malai Rusk","description":"A decadent twist on the classic tea-time snack. Our crunchy rusk is generously topped with a rich, sweet, and creamy layer of malai, creating a truly luxurious bite.\n\nIngredients: Hard-baked Rusk, Malai (Fresh Cream), Black Pepper, Salt.","price":19.00,"priceUnit":"1","image":"https://i.postimg.cc/Wbrk6yJt/image.png","type":"veg"},{"id":"prod_010","category":"sides","name":"Rusk","description":"The quintessential tea-time companion. Our classic rusk is perfectly twice-baked for an unbeatable crunch, making it ideal for dipping into your favourite cup of chai.\n\nIngredients: Refined Wheat Flour, Sugar, Yeast, Vegetable Oil, Cardamom.","price":10.00,"priceUnit":"2","image":"https://i.postimg.cc/jqf5G7qF/image.png","type":"veg"},{"id":"prod_011","category":"sides","name":"Osmania Biscuit","description":"A true icon of Hyderabad, the Osmania Biscuit is a melt-in-your-mouth delight. Its unique taste, a perfect balance of sweet and salty with a buttery texture, makes it an unforgettable treat.\n\nIngredients: Refined Flour, Butter, Sugar, Milk Solids, Salt, Cardamom.","price":10.00,"priceUnit":"2","image":"https://i.postimg.cc/Mp6pM37C/image.png","type":"veg"},{"id":"prod_012","category":"sides","name":"Fruit Biscuit","description":"A nostalgic and delightful treat for all ages. Our buttery, crumbly biscuits are packed with sweet and chewy pieces of tutti-frutti, adding a burst of fruity flavour to every bite.\n\nIngredients: Refined Flour, Butter, Sugar, Tutti-Frutti (Candied Fruits), Milk.","price":19.00,"priceUnit":"2","image":"https://i.postimg.cc/0yXP6k2S/image.png","type":"veg"}]};
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     let cart = {}; let products = []; let categories = [];
-    const categoryFilters=document.getElementById("category-filters"),productGrid=document.getElementById("product-grid"),cartCount=document.getElementById("cart-count"),cartBar=document.getElementById("cart-bar"),cartBarItems=document.getElementById("cart-bar-items"),cartBarTotal=document.getElementById("cart-bar-total"),viewCartBtn=document.getElementById("view-cart-btn"),productDetailModal=document.getElementById("product-detail-modal"),productDetailContent=document.getElementById("product-detail-content"),cartModal=document.getElementById("cart-modal"),cartModalContent=document.getElementById("cart-modal-content"),closeCartModalBtn=document.getElementById("close-cart-modal-btn"),cartItemsList=document.getElementById("cart-items-list"),emptyCartMessage=document.getElementById("empty-cart-message"),cartTotalSpan=document.getElementById("cart-total"),proceedToPayBtn=document.getElementById("proceed-to-pay-btn"),customerNameInput=document.getElementById("customer-name"),customerContactInput=document.getElementById("customer-contact"),customerAddressInput=document.getElementById("customer-address"),customerLocationInput=document.getElementById("customer-location"),getLocationBtn=document.getElementById("get-location-btn"),storeNameBanner=document.getElementById("store-name-banner"),loadingModal=document.getElementById("loading-modal");
+    const categoryFilters=document.getElementById("category-filters"),productGrid=document.getElementById("product-grid"),cartBar=document.getElementById("cart-bar"),cartBarItems=document.getElementById("cart-bar-items"),cartBarTotal=document.getElementById("cart-bar-total"),viewCartBtn=document.getElementById("view-cart-btn"),productDetailModal=document.getElementById("product-detail-modal"),productDetailContent=document.getElementById("product-detail-content"),cartModal=document.getElementById("cart-modal"),cartModalContent=document.getElementById("cart-modal-content"),closeCartModalBtn=document.getElementById("close-cart-modal-btn"),cartItemsList=document.getElementById("cart-items-list"),emptyCartMessage=document.getElementById("empty-cart-message"),cartTotalSpan=document.getElementById("cart-total"),proceedToPayBtn=document.getElementById("proceed-to-pay-btn"),customerNameInput=document.getElementById("customer-name"),customerContactInput=document.getElementById("customer-contact"),customerAddressInput=document.getElementById("customer-address"),customerLocationInput=document.getElementById("customer-location"),getLocationBtn=document.getElementById("get-location-btn"),storeNameBanner=document.getElementById("store-name-banner"),loadingModal=document.getElementById("loading-modal");
     const activeOrdersBtn = document.getElementById('active-orders-btn');
     const activeOrdersPanel = document.getElementById('active-orders-panel');
     const closeOrdersPanelBtn = document.getElementById('close-orders-panel-btn');
     const activeOrdersList = document.getElementById('active-orders-list');
+    let pollingInterval;
 
     async function handlePayment() {
-        // ... (This function remains largely the same)
         const name = customerNameInput.value.trim();
         const contact = customerContactInput.value.trim();
         const address = customerAddressInput.value.trim();
@@ -114,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
             const result = await response.json();
             if (result.success && result.payment_session_id) {
+                localStorage.setItem('customerContact', contact);
                 initiateCashfreeCheckout(result.payment_session_id);
             } else {
                 throw new Error(result.error || 'Failed to create order from server.');
@@ -126,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initiateCashfreeCheckout(paymentSessionId) {
-        // ... (This function remains the same)
         loadingModal.classList.add('hidden');
         const cashfree = new Cashfree({ mode: "production" }); 
         cashfree.checkout({ paymentSessionId: paymentSessionId })
@@ -159,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        activeOrders.forEach(orderId => {
+        activeOrders.reverse().forEach(orderId => { // .reverse() to show newest first
             const orderCard = document.createElement('div');
             orderCard.className = 'bg-white p-4 rounded-lg shadow-md';
             const whatsappMessage = encodeURIComponent(`Hi! Maskaari\nI have placed an order with order id: ${orderId}. Please provide order status update.`);
@@ -177,8 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-    // --- UPDATED INITIALIZATION ---
     function initializeStore(){
         products=menuData.products;
         categories=menuData.categories;
@@ -192,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadCartFromStorage();
         loadCustomerDetails();
         updateCart();
-        showActiveOrdersButton(); // Check on page load
+        showActiveOrdersButton();
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('track') === 'true') {
             activeOrdersBtn.click();
