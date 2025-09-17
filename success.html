@@ -67,18 +67,25 @@
 
         <h1 class="text-3xl font-bold text-gray-800 mt-4">Order Confirmed!</h1>
         <p class="text-gray-600 mt-2">Thank you for your purchase. Your order <strong id="order-id">#MASKAARI-XXX</strong> has been successfully placed.</p>
-        <p class="text-gray-500 mt-4">We've received your order details and will begin preparing it shortly. You will receive updates via WhatsApp.</p>
+        <p class="text-gray-500 mt-4">We've received your order and will begin preparing it. You can track its status at any time.</p>
         
-        <a href="index.html" class="mt-8 inline-block bg-orange-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-orange-600 transition">
-            Place Another Order
-        </a>
+        <div class="flex space-x-4 mt-8">
+            <a href="index.html" id="track-order-btn" class="flex-1 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">
+                Track Orders
+            </a>
+            <a href="index.html" class="flex-1 bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition">
+                Place New Order
+            </a>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const orderIdElement = document.getElementById('order-id');
+            const trackOrderBtn = document.getElementById('track-order-btn');
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('order_id');
+            const contact = localStorage.getItem('customerContact');
 
             if (orderId) {
                 orderIdElement.textContent = `#${orderId}`;
@@ -86,8 +93,12 @@
                 localStorage.removeItem('orderingAppCart');
             }
 
-            const backToStoreLink = document.querySelector('a');
-            backToStoreLink.href = window.location.href.replace(/success\.html.*$/, 'index.html');
+            // Set the correct link for the track order button to open the panel on the main page
+            const mainPageUrl = window.location.href.replace(/success\.html.*$/, 'index.html');
+            trackOrderBtn.href = mainPageUrl + '?track=true';
+            
+            // Set the link for the new order button
+            document.querySelectorAll('a')[1].href = mainPageUrl;
         });
     </script>
 </body>
