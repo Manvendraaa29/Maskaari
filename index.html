@@ -79,9 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeOrdersPanel = document.getElementById('active-orders-panel');
     const closeOrdersPanelBtn = document.getElementById('close-orders-panel-btn');
     const activeOrdersList = document.getElementById('active-orders-list');
-    let pollingInterval;
 
     async function handlePayment() {
+        // ... (This function remains largely the same)
         const name = customerNameInput.value.trim();
         const contact = customerContactInput.value.trim();
         const address = customerAddressInput.value.trim();
@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
             const result = await response.json();
             if (result.success && result.payment_session_id) {
-                localStorage.setItem('customerContact', contact);
                 initiateCashfreeCheckout(result.payment_session_id);
             } else {
                 throw new Error(result.error || 'Failed to create order from server.');
@@ -124,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initiateCashfreeCheckout(paymentSessionId) {
+        // ... (This function remains the same)
         loadingModal.classList.add('hidden');
         const cashfree = new Cashfree({ mode: "production" }); 
         cashfree.checkout({ paymentSessionId: paymentSessionId })
@@ -138,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // --- NEW FUNCTIONS FOR LOCAL ORDER TRACKING ---
     function showActiveOrdersButton() {
         const activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
         if (activeOrders.length > 0) {
@@ -156,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        activeOrders.reverse().forEach(orderId => { // .reverse() to show newest first
+        activeOrders.slice().reverse().forEach(orderId => { // .slice() to create a copy before reversing
             const orderCard = document.createElement('div');
             orderCard.className = 'bg-white p-4 rounded-lg shadow-md';
             const whatsappMessage = encodeURIComponent(`Hi! Maskaari\nI have placed an order with order id: ${orderId}. Please provide order status update.`);
@@ -165,13 +164,25 @@ document.addEventListener('DOMContentLoaded', () => {
             orderCard.innerHTML = `
                 <div class="flex justify-between items-center">
                     <p class="font-bold text-gray-800">${orderId}</p>
-                    <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-green-600 transition">
-                        Contact Us
-                    </a>
+                    <div class="flex items-center space-x-2">
+                        <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-green-600 transition">
+                            Contact Us
+                        </a>
+                        <button data-order-id="${orderId}" class="clear-order-btn bg-gray-200 text-gray-700 text-xs font-bold py-1 px-3 rounded-full hover:bg-red-500 hover:text-white transition">Delivered</button>
+                    </div>
                 </div>
             `;
             activeOrdersList.appendChild(orderCard);
         });
+    }
+
+    function removeOrder(orderIdToRemove) {
+        let activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
+        activeOrders = activeOrders.filter(id => id !== orderIdToRemove);
+        localStorage.setItem('customerActiveOrders', JSON.stringify(activeOrders));
+        displayActiveOrders(); // Re-render the list
+        showActiveOrdersButton(); // Hide the main button if no orders are left
+        showMessage(`Order ${orderIdToRemove} has been cleared.`);
     }
 
     function initializeStore(){
@@ -189,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCart();
         showActiveOrdersButton();
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('track') === 'true') {
+        if (urlParams.get('track') === 'true' && !activeOrdersBtn.classList.contains('hidden')) {
             activeOrdersBtn.click();
         }
     }
@@ -227,6 +238,13 @@ showMessage(errorMessage);console.error(`Geolocation Error (Code ${error.code}):
     closeOrdersPanelBtn.addEventListener('click', () => { 
         activeOrdersPanel.classList.remove('open');
     });
+    // New: Event listener for removing orders
+    activeOrdersList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('clear-order-btn')) {
+            const orderId = e.target.dataset.orderId;
+            removeOrder(orderId);
+        }
+    });
 
     categoryFilters.addEventListener('click',(e)=>{if(e.target.classList.contains('category-btn')){const a=categoryFilters.querySelector('.category-btn.active');if(a)a.classList.remove('active');e.target.classList.add('active');renderProducts(e.target.dataset.filter)}});
     productGrid.addEventListener('click',(e)=>{const c=e.target.closest('.product-card');if(!c)return;const p=c.dataset.productId;const a=e.target.closest('.add-btn, .quantity-change-btn');if(a){if(a.classList.contains('add-btn')){addToCart(p)}else{const am=a.textContent==='+'?1:-1;changeQuantity(p,am)}}else{openProductDetailModal(p)}});
@@ -244,3 +262,4 @@ openProductDetailModal(p)}});
 </script>
 </body>
 </html>
+
