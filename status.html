@@ -76,30 +76,39 @@
             document.getElementById('order-id-success').textContent = `#${orderId}`;
             document.getElementById('order-id-fail').textContent = `#${orderId}`;
             
-            // Wait a few seconds for the webhook to arrive and update the sheet
-            await new Promise(resolve => setTimeout(resolve, 4000));
-
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'getOrderStatus', orderId: orderId })
-                });
+                // Poll for the status
+                let attempts = 0;
+                const maxAttempts = 5; // Poll for up to 20 seconds
+                
+                const checkStatus = async () => {
+                    attempts++;
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'getOrderStatus', orderId: orderId })
+                    });
 
-                if (!response.ok) throw new Error('Network error');
-                const result = await response.json();
+                    if (!response.ok) throw new Error('Network error');
+                    const result = await response.json();
+                    
+                    if (result.success && result.status === 'Paid') {
+                        loadingState.classList.add('hidden');
+                        successState.classList.remove('hidden');
+                        localStorage.removeItem('orderingAppCart'); // Clear cart on success
+                    } else if (attempts >= maxAttempts) {
+                        // If it's still pending after max attempts, assume failure
+                        loadingState.classList.add('hidden');
+                        failureState.classList.remove('hidden');
+                    } else {
+                        // If still pending, wait and try again
+                        setTimeout(checkStatus, 4000);
+                    }
+                };
 
-                loadingState.classList.add('hidden');
-
-                if (result.success && result.status === 'Paid') {
-                    successState.classList.remove('hidden');
-                    // Clear the cart from the previous order
-                    localStorage.removeItem('orderingAppCart');
-                } else {
-                    failureState.classList.remove('hidden');
-                }
+                await checkStatus();
 
             } catch (error) {
                 console.error("Error verifying payment:", error);
@@ -115,3 +124,4 @@
     </script>
 </body>
 </html>
+
