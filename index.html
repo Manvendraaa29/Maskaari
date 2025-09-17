@@ -12,8 +12,6 @@
         .category-btn.active { background-color: #FB923C; color: white; font-weight: 600; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #FB923C; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #my-orders-panel { transition: transform 0.3s ease-in-out; }
-        #my-orders-panel.open { transform: translateX(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .truncate-2-lines { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -30,27 +28,16 @@
             <h1 id="store-name-banner" class="text-3xl font-bold">MASKAARI</h1>
             <p id="store-tagline-banner" class="text-lg mt-1">Muska hai Boss! Plain to sab khate.</p>
         </div>
-        <button id="my-orders-btn" class="hidden absolute top-4 right-4 z-30 bg-white/90 text-blue-600 font-semibold py-2 px-4 rounded-full shadow-lg flex items-center backdrop-blur-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-            My Orders
-        </button>
     </header>
-    
-    <div id="my-orders-panel" class="fixed top-0 right-0 h-full w-full max-w-sm bg-gray-100 shadow-xl z-50 transform translate-x-full p-4 flex flex-col">
-        <div class="flex justify-between items-center mb-4 border-b pb-2">
-            <h2 class="text-2xl font-bold text-gray-800">Your Active Orders</h2>
-            <button id="close-orders-panel-btn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
-        </div>
-        <div id="active-orders-list" class="flex-grow overflow-y-auto space-y-4"></div>
-    </div>
 
-    <!-- Other modals and main content ... -->
     <div id="category-bar-container" class="sticky top-0 bg-white shadow-md z-20 py-2">
         <div id="category-filters" class="flex justify-center items-center space-x-2 px-4 overflow-x-auto no-scrollbar"></div>
     </div>
+
     <main class="p-4 max-w-3xl mx-auto pb-24">
         <div id="product-grid" class="grid grid-cols-1 gap-4"></div>
     </main>
+
     <div id="cart-container" class="fixed bottom-4 right-4 z-30 transition-all duration-300">
         <button id="cart-button" class="bg-orange-500 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -61,6 +48,7 @@
              <button id="view-cart-btn" class="bg-white text-orange-500 font-bold py-2 px-6 rounded-md">View Cart</button>
         </div>
     </div>
+
     <div id="product-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end justify-center"><div id="product-detail-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] flex flex-col"></div></div>
     <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex items-end justify-center"><div id="cart-modal-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl p-4 transform translate-y-full transition-transform duration-300 max-h-[85vh] flex flex-col"><div class="flex justify-between items-center border-b pb-3 mb-3"><h2 class="text-2xl font-bold text-gray-800">Your Order</h2><button id="close-cart-modal-btn" class="text-gray-500 hover:text-gray-800"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="bg-white p-4 rounded-lg shadow mb-4"><h3 class="font-bold text-lg mb-2 text-gray-700">Your Details</h3><input type="text" id="customer-name" placeholder="* Enter your name" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"><input type="tel" id="customer-contact" placeholder="* Enter your WhatsApp number (10 digits)" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"><textarea id="customer-address" placeholder="* Enter your delivery address" rows="2" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"></textarea><button id="get-location-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition flex items-center justify-center"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>Use My Current Location</button><input type="hidden" id="customer-location"></div><div id="cart-items-list" class="flex-grow overflow-y-auto space-y-3"></div><div id="empty-cart-message" class="hidden text-center py-10"><svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg><h3 class="mt-4 text-xl font-semibold text-gray-500">Your cart is empty</h3><p class="text-gray-400">Add items from the menu to get started!</p></div><div class="mt-auto border-t pt-4"><div class="flex justify-between items-center text-lg font-bold text-gray-800"><span>Total Amount</span><span id="cart-total">₹0.00</span></div><button id="proceed-to-pay-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 px-4 rounded-lg mt-4 hover:bg-green-600 transition shadow-lg flex items-center justify-center">Proceed to Pay</button></div></div></div>
     <div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center"><div class="loader"></div><p class="text-white text-lg mt-4">Processing your order...</p></div>
@@ -76,14 +64,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     let cart = {}; let products = []; let categories = [];
     const categoryFilters=document.getElementById("category-filters"),productGrid=document.getElementById("product-grid"),cartButton=document.getElementById("cart-button"),cartCount=document.getElementById("cart-count"),cartBar=document.getElementById("cart-bar"),cartBarItems=document.getElementById("cart-bar-items"),cartBarTotal=document.getElementById("cart-bar-total"),viewCartBtn=document.getElementById("view-cart-btn"),productDetailModal=document.getElementById("product-detail-modal"),productDetailContent=document.getElementById("product-detail-content"),cartModal=document.getElementById("cart-modal"),cartModalContent=document.getElementById("cart-modal-content"),closeCartModalBtn=document.getElementById("close-cart-modal-btn"),cartItemsList=document.getElementById("cart-items-list"),emptyCartMessage=document.getElementById("empty-cart-message"),cartTotalSpan=document.getElementById("cart-total"),proceedToPayBtn=document.getElementById("proceed-to-pay-btn"),customerNameInput=document.getElementById("customer-name"),customerContactInput=document.getElementById("customer-contact"),customerAddressInput=document.getElementById("customer-address"),customerLocationInput=document.getElementById("customer-location"),getLocationBtn=document.getElementById("get-location-btn"),storeNameBanner=document.getElementById("store-name-banner"),loadingModal=document.getElementById("loading-modal");
-    const myOrdersBtn = document.getElementById('my-orders-btn');
-    const myOrdersPanel = document.getElementById('my-orders-panel');
-    const closeOrdersPanelBtn = document.getElementById('close-orders-panel-btn');
-    const activeOrdersList = document.getElementById('active-orders-list');
-    let pollingInterval;
-
+    
     async function handlePayment() {
-        // ... (This function remains the same as your provided code)
         const name = customerNameInput.value.trim();
         const contact = customerContactInput.value.trim();
         const address = customerAddressInput.value.trim();
@@ -113,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
             const result = await response.json();
             if (result.success && result.payment_session_id) {
-                localStorage.setItem('customerContact', contact);
                 initiateCashfreeCheckout(result.payment_session_id);
             } else {
                 throw new Error(result.error || 'Failed to create order from server.');
@@ -126,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initiateCashfreeCheckout(paymentSessionId) {
-        // ... (This function remains the same)
         loadingModal.classList.add('hidden');
         const cashfree = new Cashfree({ mode: "production" }); 
         cashfree.checkout({ paymentSessionId: paymentSessionId })
@@ -141,78 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // --- THE FIX: This function now uses the JSONP method ---
-    function fetchAndDisplayOrders() {
-        const customerId = localStorage.getItem('customerContact');
-        if (!customerId) {
-            activeOrdersList.innerHTML = `<p class="text-center text-gray-500 mt-8">Place an order to track it here.</p>`;
-            return;
-        }
-
-        // Define a unique callback function name to avoid conflicts
-        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-        
-        // Make the callback function available globally
-        window[callbackName] = function(data) {
-            try {
-                if (data.success) {
-                    renderActiveOrders(data.orders);
-                } else {
-                    throw new Error(data.error || "Failed to parse orders from JSONP.");
-                }
-            } catch (error) {
-                console.error("Error processing JSONP data:", error);
-                activeOrdersList.innerHTML = `<p class="text-center text-red-500 mt-8">Could not load orders. There was a problem with the server response.</p>`;
-            }
-            
-            // Cleanup the script tag and the global function
-            document.body.removeChild(document.getElementById(callbackName));
-            delete window[callbackName];
-        };
-
-        const script = document.createElement('script');
-        script.id = callbackName;
-        script.src = `${GOOGLE_SCRIPT_URL}?action=getCustomerOrders&customerId=${customerId}&callback=${callbackName}`;
-        
-        script.onerror = () => {
-             activeOrdersList.innerHTML = `<p class="text-center text-red-500 mt-8">Could not connect to the order server. Please check your connection.</p>`;
-             document.body.removeChild(script);
-             delete window[callbackName];
-        };
-
-        document.body.appendChild(script);
-    }
-    
-    // ... (All other functions remain exactly the same as your provided code)
-    function renderActiveOrders(orders) {
-        activeOrdersList.innerHTML = '';
-        if (orders.length === 0) {
-            activeOrdersList.innerHTML = `<p class="text-center text-gray-500 mt-8">You have no active orders.</p>`;
-            return;
-        }
-        orders.forEach(order => {
-            const orderCard = document.createElement('div');
-            orderCard.className = 'bg-white p-4 rounded-lg shadow-md';
-            let itemsHtml = Object.entries(JSON.parse(order.cart)).map(([name, details]) => `<li class="ml-4 text-gray-600">${name} (x${details.quantity})</li>`).join('');
-            let statusColor = 'bg-gray-200 text-gray-800';
-            if (order.status === 'Paid') statusColor = 'bg-blue-100 text-blue-800';
-            if (order.status === 'Preparing') statusColor = 'bg-yellow-100 text-yellow-800';
-            if (order.status === 'Out for Delivery') statusColor = 'bg-green-100 text-green-800';
-            const whatsappMessage = encodeURIComponent(`Hi! Maskaari, my order ID is ${order.orderId}`);
-            const whatsappLink = `https://wa.me/916387936753?text=${whatsappMessage}`;
-            orderCard.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <p class="font-bold text-gray-800">${order.orderId}</p>
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${statusColor}">${order.status}</span>
-                </div>
-                <ul class="text-sm list-disc mt-2">${itemsHtml}</ul>
-                <a href="${whatsappLink}" target="_blank" class="inline-block mt-3 bg-green-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-green-600 transition">Contact Us on WhatsApp</a>
-            `;
-            activeOrdersList.appendChild(orderCard);
-        });
-    }
-    function initializeStore(){products=menuData.products;categories=menuData.categories;storeNameBanner.textContent=STORE_NAME;const bannerTagline=document.getElementById('store-tagline-banner');bannerTagline.textContent="Muska hai Boss! Plain to sab khate.";const bannerImg=document.querySelector('header img');bannerImg.src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI";renderCategories();renderProducts('all');loadCartFromStorage();loadCustomerDetails();updateCart();showMyOrdersButtonIfApplicable();const urlParams = new URLSearchParams(window.location.search);if (urlParams.get('track') === 'true') {myOrdersBtn.click();}}
-    function showMyOrdersButtonIfApplicable() {const customerId = localStorage.getItem('customerContact');if (customerId) {myOrdersBtn.classList.remove('hidden');} else {myOrdersBtn.classList.add('hidden');}}
+    function initializeStore(){products=menuData.products;categories=menuData.categories;storeNameBanner.textContent=STORE_NAME;const bannerTagline=document.getElementById('store-tagline-banner');bannerTagline.textContent="Muska hai Boss! Plain to sab khate.";const bannerImg=document.querySelector('header img');bannerImg.src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI";renderCategories();renderProducts('all');loadCartFromStorage();loadCustomerDetails();updateCart();}
     function renderCategories(){categoryFilters.innerHTML='';const allBtn=document.createElement('button');allBtn.className='category-btn active text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';allBtn.textContent='All';allBtn.dataset.filter='all';categoryFilters.appendChild(allBtn);categories.forEach(category=>{const button=document.createElement('button');button.className='category-btn text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';button.textContent=category.name;button.dataset.filter=category.id;categoryFilters.appendChild(button)})}
     function renderProducts(filter='all'){productGrid.innerHTML='';const filteredProducts=filter==='all'?products:products.filter(p=>p.category===filter);filteredProducts.forEach(product=>{const card=document.createElement('div');card.className='product-card flex h-36 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';card.dataset.productId=product.id;const typeIcon=product.type==='veg'?`<div class="w-5 h-5 border border-green-600 flex items-center justify-center mr-2"><div class="w-3 h-3 bg-green-600 rounded-full"></div></div>`:`<div class="w-5 h-5 border border-red-600 flex items-center justify-center mr-2"><div class="w-0 h-0 border-l-[6px] border-l-transparent border-t-[9px] border-t-red-600 border-r-[6px] border-r-transparent"></div></div>`;const priceHTML=product.priceUnit?`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>`:`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(2)}</span>`;card.innerHTML=`<img src="${product.image}" alt="${product.name}" class="w-32 h-full object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';"><div class="p-3 flex flex-col flex-grow"><div class="flex items-center">${typeIcon}<h3 class="font-semibold text-gray-800">${product.name}</h3></div><div class="mt-1 flex-grow"><p class="text-sm text-gray-500 truncate-2-lines">${product.description.split('\n\n')[0]}</p></div><div class="flex justify-between items-center mt-auto pt-2">${priceHTML}<div class="product-action"></div></div></div>`;productGrid.appendChild(card);updateProductCard(product.id)})}
     function updateProductCard(productId){const card=productGrid.querySelector(`.product-card[data-product-id="${productId}"]`);if(!card)return;const actionContainer=card.querySelector('.product-action');const quantity=cart[productId]||0;card.classList.toggle('ring-2',quantity>0);card.classList.toggle('ring-orange-400',quantity>0);if(quantity===0){actionContainer.innerHTML=`<button data-product-id="${productId}" class="add-btn text-orange-500 border border-orange-500 font-bold text-sm py-2 px-6 rounded-md hover:bg-orange-500 hover:text-white transition-all duration-200">ADD</button>`}else{actionContainer.innerHTML=`<div class="flex items-center justify-center border border-orange-500 rounded-md"><button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">-</button><span class="font-bold text-orange-500 px-2">${quantity}</span><button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">+</button></div>`}}
@@ -236,16 +145,8 @@ showMessage(errorMessage);console.error(`Geolocation Error (Code ${error.code}):
     function loadCartFromStorage(){const d=localStorage.getItem('orderingAppCart');if(d)cart=JSON.parse(d)}
     function saveCustomerDetails(){const d={name:customerNameInput.value,contact:customerContactInput.value,address:customerAddressInput.value};localStorage.setItem('orderingAppCustomerDetails',JSON.stringify(d))}
     function loadCustomerDetails(){const d=localStorage.getItem('orderingAppCustomerDetails');if(d){const p=JSON.parse(d);customerNameInput.value=p.name||'';customerContactInput.value=p.contact||'';customerAddressInput.value=p.address||''}}
-    myOrdersBtn.addEventListener('click', () => { 
-        fetchAndDisplayOrders(); 
-        myOrdersPanel.classList.add('open');
-        if (pollingInterval) clearInterval(pollingInterval);
-        pollingInterval = setInterval(fetchAndDisplayOrders, 30000);
-    });
-    closeOrdersPanelBtn.addEventListener('click', () => { 
-        myOrdersPanel.classList.remove('open');
-        clearInterval(pollingInterval);
-    });
+    
+    // --- EVENT LISTENERS ---
     categoryFilters.addEventListener('click',(e)=>{if(e.target.classList.contains('category-btn')){const a=categoryFilters.querySelector('.category-btn.active');if(a)a.classList.remove('active');e.target.classList.add('active');renderProducts(e.target.dataset.filter)}});
     productGrid.addEventListener('click',(e)=>{const c=e.target.closest('.product-card');if(!c)return;const p=c.dataset.productId;const a=e.target.closest('.add-btn, .quantity-change-btn');if(a){if(a.classList.contains('add-btn')){addToCart(p)}else{const am=a.textContent==='+'?1:-1;changeQuantity(p,am)}}else{openProductDetailModal(p)}});
     productDetailModal.addEventListener('click',(e)=>{if(e.target===productDetailModal){closeProductDetailModal();return}const b=e.target.closest('.add-btn, .quantity-change-btn');if(b){const p=b.dataset.productId;if(b.classList.contains('add-btn')){addToCart(p)}else{const am=b.textContent==='+'?1:-1;changeQuantity(p,am)}
