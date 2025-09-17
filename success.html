@@ -67,30 +67,45 @@
 
         <h1 class="text-3xl font-bold text-gray-800 mt-4">Order Confirmed!</h1>
         <p class="text-gray-600 mt-2">Thank you for your purchase. Your order <strong id="order-id">#MASKAARI-XXX</strong> has been successfully placed.</p>
-        <p class="text-gray-500 mt-4">We've received your order and will begin preparing it shortly. You will receive a WhatsApp message from us soon.</p>
+        <p class="text-gray-500 mt-4">We've received your order and will begin preparing it. You can check on your active orders at any time.</p>
         
-        <a href="index.html" class="mt-8 inline-block w-full bg-orange-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-orange-600 transition">
-            Place Another Order
-        </a>
+        <div class="flex space-x-4 mt-8">
+            <a href="index.html" id="track-order-btn" class="flex-1 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">
+                Track Orders
+            </a>
+            <a href="index.html" id="new-order-btn" class="flex-1 bg-orange-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-orange-600 transition">
+                Place New Order
+            </a>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const orderIdElement = document.getElementById('order-id');
+            const trackOrderBtn = document.getElementById('track-order-btn');
+            const newOrderBtn = document.getElementById('new-order-btn');
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('order_id');
 
             if (orderId) {
                 orderIdElement.textContent = `#${orderId}`;
-                // Clear the cart from the previous order so the user can start fresh.
+                
+                // Save this new order ID to a list in localStorage
+                let activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
+                if (!activeOrders.includes(orderId)) {
+                    activeOrders.push(orderId);
+                }
+                localStorage.setItem('customerActiveOrders', JSON.stringify(activeOrders));
+
+                // Clear the cart for the next order
                 localStorage.removeItem('orderingAppCart');
             }
 
-            // Ensure the "Place Another Order" link points to the correct root page.
-            const backToStoreLink = document.querySelector('a');
-            backToStoreLink.href = window.location.href.replace(/success\.html.*$/, 'index.html');
+            // Set the correct links for the buttons
+            const mainPageUrl = window.location.href.replace(/success\.html.*$/, 'index.html');
+            trackOrderBtn.href = mainPageUrl + '?track=true';
+            newOrderBtn.href = mainPageUrl;
         });
     </script>
 </body>
 </html>
-
