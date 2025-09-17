@@ -12,8 +12,6 @@
         .category-btn.active { background-color: #FB923C; color: white; font-weight: 600; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #FB923C; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #active-orders-panel { transition: transform 0.3s ease-in-out; }
-        #active-orders-panel.open { transform: translateX(0); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .truncate-2-lines { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -32,14 +30,6 @@
         </div>
     </header>
     
-    <div id="active-orders-panel" class="fixed top-0 right-0 h-full w-full max-w-sm bg-gray-100 shadow-xl z-50 transform translate-x-full p-4 flex flex-col">
-        <div class="flex justify-between items-center mb-4 border-b pb-2">
-            <h2 class="text-2xl font-bold text-gray-800">Your Active Orders</h2>
-            <button id="close-orders-panel-btn" class="text-gray-500 hover:text-gray-800 text-3xl font-light">&times;</button>
-        </div>
-        <div id="active-orders-list" class="flex-grow overflow-y-auto space-y-4"></div>
-    </div>
-
     <div id="category-bar-container" class="sticky top-0 bg-white shadow-md z-20 py-2">
         <div id="category-filters" class="flex justify-center items-center space-x-2 px-4 overflow-x-auto no-scrollbar"></div>
     </div>
@@ -47,10 +37,6 @@
     <main class="p-4 max-w-3xl mx-auto pb-24">
         <div id="product-grid" class="grid grid-cols-1 gap-4"></div>
     </main>
-
-    <button id="active-orders-btn" class="hidden fixed bottom-4 right-4 z-30 bg-blue-600 text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center transform hover:scale-110 transition-transform">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h4a1 1 0 100-2H7zm0 4a1 1 0 100 2h4a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
-    </button>
 
     <div id="cart-bar" class="hidden fixed bottom-0 left-0 right-0 bg-orange-500 text-white p-3 shadow-lg flex justify-between items-center transform translate-y-full transition-transform duration-300">
          <div><p id="cart-bar-items" class="font-bold">0 Items</p><p id="cart-bar-total" class="text-sm">₹0.00</p></div>
@@ -65,7 +51,6 @@
 <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjujj6ixAUQZPWfjX8-S2ffFsNcHiZuJljT8bpLmxnNf_SPh2CRnCQdzS9E68v_Q3yCg/exec';
     const STORE_NAME = 'MASKAARI';
-    const BUSINESS_WHATSAPP_NUMBER = '916387936753';
     const menuData = {"categories":[{"id":"beverages","name":"Beverages"},{"id":"quick-bites","name":"Quick Bites"},{"id":"sides","name":"Sides"}],"products":[{"id":"prod_001","category":"beverages","name":"Irani Chai","description":"Indulge in the authentic taste of Hyderabad with our classic Irani Chai. This rich, creamy, and strong tea is slow-brewed for hours, creating a uniquely satisfying and comforting experience in every single sip.\n\nIngredients: Tea Decoction, Milk, Sugar, Special Spices, Condensed Milk, Milk Powder, Cream.","price":1.00,"image":"https://i.postimg.cc/KYxCfCqN/steaming-cup-coffee-with-cinnamon-sticks-star-anise-coffee-beans-dark-background-9975-124681.avif","type":"veg"},{"id":"prod_002","category":"beverages","name":"Subza Lemon Tea","description":"A delightfully refreshing and zesty beverage perfect for any time of day. Our lemon tea is infused with healthy basil seeds (subza) for a unique texture and a cool, invigorating finish.\n\nIngredients: Black Tea, Fresh Lemon Juice, Sugar, Basil Seeds (Subza), Black Salt, Spices.","price":40.00,"image":"https://i.postimg.cc/Gm5q8V0t/image.png","type":"veg"},{"id":"prod_003","category":"quick-bites","name":"Bun Muska","description":"The ultimate comfort snack, our Bun Muska is a soft, fluffy bun generously slathered with creamy butter.Perfectly simple and delicious, it's the ideal companion for a hot cup of Irani Chai.\n\nIngredients: Milk Bun, White Amul Butter, Full Cream.","price":50.00,"image":"https://i.postimg.cc/zXhBY1xF/Unknown.jpg","type":"veg"},{"id":"prod_004","category":"quick-bites","name":"Salted Fries","description":"The timeless classic, done right. Our fries are cooked to a perfect golden crisp and lightly seasoned with salt, making them the ultimate satisfying snack for any craving.\n\nIngredients: Potatoes, Vegetable Oil, Salt.","price":69.00,"image":"https://i.postimg.cc/GmHjCKBC/image.png","type":"veg"},{"id":"prod_005","category":"quick-bites","name":"Peri-Peri Fries","description":"Turn up the heat with our addictive Peri Peri Fries. Crispy golden fries are tossed in a fiery and tangy Peri Peri seasoning for a flavour explosion in every single bite.\n\nIngredients: Potatoes, Vegetable Oil, Peri Peri Seasoning, Salt.","price":79.00,"image":"https://i.postimg.cc/Qd2cr3GQ/image.png","type":"veg"},{"id":"prod_006","category":"quick-bites","name":"Cheesy Fries","description":"A cheese lover's dream come true. Our perfectly crispy fries are generously drizzled with a warm, gooey, and savoury cheese sauce for an irresistibly indulgent treat.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Salt.","price":89.00,"image":"https://i.postimg.cc/3JWG4R3j/image.png","type":"veg"},{"id":"prod_007","category":"quick-bites","name":"Loaded Fries","description":"Why settle for less when you can have it all? Our Loaded Fries are an epic feast, featuring crispy fries smothered in cheese sauce, zesty mayonnaise, and fresh toppings.\n\nIngredients: Potatoes, Vegetable Oil, Cheese Sauce, Mayonnaise, Chopped Onions, Tomatoes, Salt, Flavoured Sauces.","price":109.00,"image":"https://i.postimg.cc/ZRTBTYfd/image.png","type":"veg"},{"id":"prod_008","category":"quick-bites","name":"Malai Rusk","description":"A decadent twist on the classic tea-time snack. Our crunchy rusk is generously topped with a rich, sweet, and creamy layer of malai, creating a truly luxurious bite.\n\nIngredients: Hard-baked Rusk, Malai (Fresh Cream), Black Pepper, Salt.","price":19.00,"priceUnit":"1","image":"https://i.postimg.cc/Wbrk6yJt/image.png","type":"veg"},{"id":"prod_010","category":"sides","name":"Rusk","description":"The quintessential tea-time companion. Our classic rusk is perfectly twice-baked for an unbeatable crunch, making it ideal for dipping into your favourite cup of chai.\n\nIngredients: Refined Wheat Flour, Sugar, Yeast, Vegetable Oil, Cardamom.","price":10.00,"priceUnit":"2","image":"https://i.postimg.cc/jqf5G7qF/image.png","type":"veg"},{"id":"prod_011","category":"sides","name":"Osmania Biscuit","description":"A true icon of Hyderabad, the Osmania Biscuit is a melt-in-your-mouth delight. Its unique taste, a perfect balance of sweet and salty with a buttery texture, makes it an unforgettable treat.\n\nIngredients: Refined Flour, Butter, Sugar, Milk Solids, Salt, Cardamom.","price":10.00,"priceUnit":"2","image":"https://i.postimg.cc/Mp6pM37C/image.png","type":"veg"},{"id":"prod_012","category":"sides","name":"Fruit Biscuit","description":"A nostalgic and delightful treat for all ages. Our buttery, crumbly biscuits are packed with sweet and chewy pieces of tutti-frutti, adding a burst of fruity flavour to every bite.\n\nIngredients: Refined Flour, Butter, Sugar, Tutti-Frutti (Candied Fruits), Milk.","price":19.00,"priceUnit":"2","image":"https://i.postimg.cc/0yXP6k2S/image.png","type":"veg"}]};
 </script>
 
@@ -73,11 +58,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let cart = {}; let products = []; let categories = [];
     const categoryFilters=document.getElementById("category-filters"),productGrid=document.getElementById("product-grid"),cartBar=document.getElementById("cart-bar"),cartBarItems=document.getElementById("cart-bar-items"),cartBarTotal=document.getElementById("cart-bar-total"),viewCartBtn=document.getElementById("view-cart-btn"),productDetailModal=document.getElementById("product-detail-modal"),productDetailContent=document.getElementById("product-detail-content"),cartModal=document.getElementById("cart-modal"),cartModalContent=document.getElementById("cart-modal-content"),closeCartModalBtn=document.getElementById("close-cart-modal-btn"),cartItemsList=document.getElementById("cart-items-list"),emptyCartMessage=document.getElementById("empty-cart-message"),cartTotalSpan=document.getElementById("cart-total"),proceedToPayBtn=document.getElementById("proceed-to-pay-btn"),customerNameInput=document.getElementById("customer-name"),customerContactInput=document.getElementById("customer-contact"),customerAddressInput=document.getElementById("customer-address"),customerLocationInput=document.getElementById("customer-location"),getLocationBtn=document.getElementById("get-location-btn"),storeNameBanner=document.getElementById("store-name-banner"),loadingModal=document.getElementById("loading-modal");
-    const activeOrdersBtn = document.getElementById('active-orders-btn');
-    const activeOrdersPanel = document.getElementById('active-orders-panel');
-    const closeOrdersPanelBtn = document.getElementById('close-orders-panel-btn');
-    const activeOrdersList = document.getElementById('active-orders-list');
-
+    
     async function handlePayment() {
         const name = customerNameInput.value.trim();
         const contact = customerContactInput.value.trim();
@@ -87,18 +68,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!name) { showMessage("Please enter your name."); customerNameInput.focus(); return; }
         if (!contact || !/^\d{10}$/.test(contact)) { showMessage("Please enter a valid 10-digit WhatsApp number."); customerContactInput.focus(); return; }
         if (!address) { showMessage("Please enter your address."); customerAddressInput.focus(); return; }
-        if (!location) { showMessage("Please click 'Use My Current Location' before paying."); return; }
+        if (!location) { showMessage("Please enable location for ordering by clicking the button above."); return; }
         loadingModal.classList.remove('hidden');
-        const tempOrderDetails = { timestamp: new Date().toLocaleString(), cart: { ...cart } };
-        sessionStorage.setItem('pendingOrder', JSON.stringify(tempOrderDetails));
         const totalPrice = calculateTotalPrice();
-        const cartDetailsForScript = {};
+        const cartDetails = {};
         Object.entries(cart).forEach(([id, qty]) => {
             const product = getProductById(id);
-            if(product) cartDetailsForScript[product.name] = { quantity: qty, price: product.price };
+            if(product) cartDetails[product.name] = { quantity: qty, price: product.price };
         });
         const returnUrl = window.location.href.split('?')[0].replace(/index\.html$/, '') + 'success.html';
-        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetailsForScript, customer: { name, contact, address, location }, return_url: returnUrl };
+        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetails, customer: { name, contact, address, location }, return_url: returnUrl };
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -136,78 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    function showActiveOrdersButton() {
-        const activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
-        if (activeOrders.length > 0) {
-            activeOrdersBtn.classList.remove('hidden');
-        } else {
-            activeOrdersBtn.classList.add('hidden');
-        }
-    }
-
-    function displayActiveOrders() {
-        const activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
-        activeOrdersList.innerHTML = '';
-        if (activeOrders.length === 0) {
-            activeOrdersList.innerHTML = `<p class="text-center text-gray-500 mt-8">You have no active orders.</p>`;
-            return;
-        }
-        activeOrders.slice().reverse().forEach(order => {
-            const orderCard = document.createElement('div');
-            orderCard.className = 'bg-white p-4 rounded-lg shadow-md';
-            let itemsHtml = Object.entries(order.cart).map(([productId, quantity]) => {
-                const product = getProductById(productId);
-                return product ? `<li class="ml-4 text-gray-600">${product.name} (x${quantity})</li>` : '';
-            }).join('');
-            const whatsappMessage = encodeURIComponent(`Hi! Maskaari\nI have placed an order with order id: ${order.id}. Please provide order status update.`);
-            const whatsappLink = `https://wa.me/${BUSINESS_WHATSAPP_NUMBER}?text=${whatsappMessage}`;
-            orderCard.innerHTML = `
-                <div>
-                    <p class="font-bold text-lg text-gray-800">${order.id}</p>
-                    <p class="text-xs text-gray-500">${order.timestamp}</p>
-                </div>
-                <ul class="text-sm list-disc mt-2">${itemsHtml}</ul>
-                <div class="flex justify-between items-center mt-4">
-                     <a href="${whatsappLink}" target="_blank" class="flex items-center bg-green-500 text-white text-xs font-bold py-2 px-3 rounded-full hover:bg-green-600 transition">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.269.654 4.542 1.916 6.554l-.254.465-1.016 3.717 3.717-1.015.464-.255z"/></svg>
-                        Contact Us
-                    </a>
-                    <button data-order-id="${order.id}" class="delivered-btn bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-full hover:bg-red-500 hover:text-white transition">Delivered</button>
-                </div>`;
-            activeOrdersList.appendChild(orderCard);
-        });
-    }
-
-    function removeOrder(orderIdToRemove) {
-        let activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
-        activeOrders = activeOrders.filter(order => order.id !== orderIdToRemove);
-        localStorage.setItem('customerActiveOrders', JSON.stringify(activeOrders));
-        displayActiveOrders(); 
-        showActiveOrdersButton(); 
-        showMessage(`Order ${orderIdToRemove} has been cleared.`);
-    }
-
-    function initializeStore(){
-        products=menuData.products;
-        categories=menuData.categories;
-        storeNameBanner.textContent=STORE_NAME;
-        const bannerTagline=document.getElementById('store-tagline-banner');
-        bannerTagline.textContent="Muska hai Boss! Plain to sab khate.";
-        const bannerImg=document.querySelector('header img');
-        bannerImg.src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI";
-        renderCategories();
-        renderProducts('all');
-        loadCartFromStorage();
-        loadCustomerDetails();
-        updateCart();
-        showActiveOrdersButton();
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('track') === 'true' && (JSON.parse(localStorage.getItem('customerActiveOrders')) || []).length > 0) {
-            activeOrdersBtn.click();
-        }
-    }
-    
-    // --- All other functions are the same ---
+    function initializeStore(){products=menuData.products;categories=menuData.categories;storeNameBanner.textContent=STORE_NAME;const bannerTagline=document.getElementById('store-tagline-banner');bannerTagline.textContent="Muska hai Boss! Plain to sab khate.";const bannerImg=document.querySelector('header img');bannerImg.src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI";renderCategories();renderProducts('all');loadCartFromStorage();loadCustomerDetails();updateCart();}
     function renderCategories(){categoryFilters.innerHTML='';const allBtn=document.createElement('button');allBtn.className='category-btn active text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';allBtn.textContent='All';allBtn.dataset.filter='all';categoryFilters.appendChild(allBtn);categories.forEach(category=>{const button=document.createElement('button');button.className='category-btn text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';button.textContent=category.name;button.dataset.filter=category.id;categoryFilters.appendChild(button)})}
     function renderProducts(filter='all'){productGrid.innerHTML='';const filteredProducts=filter==='all'?products:products.filter(p=>p.category===filter);filteredProducts.forEach(product=>{const card=document.createElement('div');card.className='product-card flex h-36 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';card.dataset.productId=product.id;const typeIcon=product.type==='veg'?`<div class="w-5 h-5 border border-green-600 flex items-center justify-center mr-2"><div class="w-3 h-3 bg-green-600 rounded-full"></div></div>`:`<div class="w-5 h-5 border border-red-600 flex items-center justify-center mr-2"><div class="w-0 h-0 border-l-[6px] border-l-transparent border-t-[9px] border-t-red-600 border-r-[6px] border-r-transparent"></div></div>`;const priceHTML=product.priceUnit?`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>`:`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(2)}</span>`;card.innerHTML=`<img src="${product.image}" alt="${product.name}" class="w-32 h-full object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';"><div class="p-3 flex flex-col flex-grow"><div class="flex items-center">${typeIcon}<h3 class="font-semibold text-gray-800">${product.name}</h3></div><div class="mt-1 flex-grow"><p class="text-sm text-gray-500 truncate-2-lines">${product.description.split('\n\n')[0]}</p></div><div class="flex justify-between items-center mt-auto pt-2">${priceHTML}<div class="product-action"></div></div></div>`;productGrid.appendChild(card);updateProductCard(product.id)})}
     function updateProductCard(productId){const card=productGrid.querySelector(`.product-card[data-product-id="${productId}"]`);if(!card)return;const actionContainer=card.querySelector('.product-action');const quantity=cart[productId]||0;card.classList.toggle('ring-2',quantity>0);card.classList.toggle('ring-orange-400',quantity>0);if(quantity===0){actionContainer.innerHTML=`<button data-product-id="${productId}" class="add-btn text-orange-500 border border-orange-500 font-bold text-sm py-2 px-6 rounded-md hover:bg-orange-500 hover:text-white transition-all duration-200">ADD</button>`}else{actionContainer.innerHTML=`<div class="flex items-center justify-center border border-orange-500 rounded-md"><button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">-</button><span class="font-bold text-orange-500 px-2">${quantity}</span><button data-product-id="${productId}" class="quantity-change-btn text-orange-500 w-8 h-8 flex items-center justify-center font-bold text-lg">+</button></div>`}}
@@ -233,25 +141,7 @@ showMessage(errorMessage);console.error(`Geolocation Error (Code ${error.code}):
     function loadCustomerDetails(){const d=localStorage.getItem('orderingAppCustomerDetails');if(d){const p=JSON.parse(d);customerNameInput.value=p.name||'';customerContactInput.value=p.contact||'';customerAddressInput.value=p.address||''}}
     
     // --- EVENT LISTENERS ---
-    activeOrdersBtn.addEventListener('click', () => { 
-        displayActiveOrders(); 
-        activeOrdersPanel.classList.add('open');
-    });
-    closeOrdersPanelBtn.addEventListener('click', () => { 
-        activeOrdersPanel.classList.remove('open');
-    });
-    activeOrdersList.addEventListener('click', (e) => {
-        if (e.target.closest('.delivered-btn')) {
-            const orderId = e.target.closest('.delivered-btn').dataset.orderId;
-            removeOrder(orderId);
-        }
-    });
-    categoryFilters.addEventListener('click',(e)=>{if(e.target.classList.contains('category-btn')){const a=categoryFilters.querySelector('.category-btn.active');if(a)a.classList.remove('active');e.target.classList.add('active');renderProducts(e.target.dataset.filter)}});
-    productGrid.addEventListener('click',(e)=>{const c=e.target.closest('.product-card');if(!c)return;const p=c.dataset.productId;const a=e.target.closest('.add-btn, .quantity-change-btn');if(a){if(a.classList.contains('add-btn')){addToCart(p)}else{const am=a.textContent==='+'?1:-1;changeQuantity(p,am)}}else{openProductDetailModal(p)}});
-    productDetailModal.addEventListener('click',(e)=>{if(e.target===productDetailModal){closeProductDetailModal();return}const b=e.target.closest('.add-btn, .quantity-change-btn');if(b){const p=b.dataset.productId;if(b.classList.contains('add-btn')){addToCart(p)}else{const am=b.textContent==='+'?1:-1;changeQuantity(p,am)}
-openProductDetailModal(p)}});
-    cartItemsList.addEventListener('click',(e)=>{let b=e.target.closest('.quantity-change-btn');if(b){changeQuantity(b.dataset.productId,b.textContent==='+'?1:-1)}});
-    [viewCartBtn].forEach(b=>b.addEventListener('click',openCartModal));
+    viewCartBtn.addEventListener('click',openCartModal);
     closeCartModalBtn.addEventListener('click',closeCartModal);
     cartModal.addEventListener('click',(e)=>{if(e.target===cartModal)closeCartModal()});
     [customerNameInput,customerContactInput,customerAddressInput].forEach(i=>{i.addEventListener('input',saveCustomerDetails)});
