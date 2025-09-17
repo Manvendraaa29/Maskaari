@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const activeOrdersList = document.getElementById('active-orders-list');
 
     async function handlePayment() {
-        // ... (This function remains largely the same)
         const name = customerNameInput.value.trim();
         const contact = customerContactInput.value.trim();
         const address = customerAddressInput.value.trim();
@@ -92,14 +91,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!address) { showMessage("Please enter your address."); customerAddressInput.focus(); return; }
         if (!location) { showMessage("Please enable location for ordering."); return; }
         loadingModal.classList.remove('hidden');
+        
+        // Temporarily store cart details before payment
+        const tempOrderDetails = {
+            timestamp: new Date().toLocaleString(),
+            cart: { ...cart } // Create a copy of the cart
+        };
+        sessionStorage.setItem('pendingOrder', JSON.stringify(tempOrderDetails));
+
         const totalPrice = calculateTotalPrice();
-        const cartDetails = {};
+        const cartDetailsForScript = {};
         Object.entries(cart).forEach(([id, qty]) => {
             const product = getProductById(id);
-            if(product) cartDetails[product.name] = { quantity: qty, price: product.price };
+            if(product) cartDetailsForScript[product.name] = { quantity: qty, price: product.price };
         });
+
         const returnUrl = window.location.href.split('?')[0].replace(/index\.html$/, '') + 'success.html';
-        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetails, customer: { name, contact, address, location }, return_url: returnUrl };
+        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetailsForScript, customer: { name, contact, address, location }, return_url: returnUrl };
+        
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -123,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initiateCashfreeCheckout(paymentSessionId) {
-        // ... (This function remains the same)
         loadingModal.classList.add('hidden');
         const cashfree = new Cashfree({ mode: "production" }); 
         cashfree.checkout({ paymentSessionId: paymentSessionId })
@@ -155,21 +163,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        activeOrders.slice().reverse().forEach(orderId => { // .slice() to create a copy before reversing
+        activeOrders.slice().reverse().forEach(order => {
             const orderCard = document.createElement('div');
             orderCard.className = 'bg-white p-4 rounded-lg shadow-md';
-            const whatsappMessage = encodeURIComponent(`Hi! Maskaari\nI have placed an order with order id: ${orderId}. Please provide order status update.`);
+            
+            let itemsHtml = Object.entries(order.cart).map(([productId, quantity]) => {
+                const product = getProductById(productId);
+                return product ? `<li class="ml-4 text-gray-600">${product.name} (x${quantity})</li>` : '';
+            }).join('');
+
+            const whatsappMessage = encodeURIComponent(`Hi! Maskaari\nI have placed an order with order id: ${order.id}. Please provide order status update.`);
             const whatsappLink = `https://wa.me/${BUSINESS_WHATSAPP_NUMBER}?text=${whatsappMessage}`;
             
             orderCard.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <p class="font-bold text-gray-800">${orderId}</p>
-                    <div class="flex items-center space-x-2">
-                        <a href="${whatsappLink}" target="_blank" class="bg-green-500 text-white text-xs font-bold py-1 px-3 rounded-full hover:bg-green-600 transition">
-                            Contact Us
-                        </a>
-                        <button data-order-id="${orderId}" class="clear-order-btn bg-gray-200 text-gray-700 text-xs font-bold py-1 px-3 rounded-full hover:bg-red-500 hover:text-white transition">Delivered</button>
-                    </div>
+                <div>
+                    <p class="font-bold text-lg text-gray-800">${order.id}</p>
+                    <p class="text-xs text-gray-500">${order.timestamp}</p>
+                </div>
+                <ul class="text-sm list-disc mt-2">${itemsHtml}</ul>
+                <div class="flex justify-between items-center mt-4">
+                     <a href="${whatsappLink}" target="_blank" class="flex items-center bg-green-500 text-white text-xs font-bold py-2 px-3 rounded-full hover:bg-green-600 transition">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.269.654 4.542 1.916 6.554l-.254.465-1.016 3.717 3.717-1.015.464-.255z"/></svg>
+                        Contact Us
+                    </a>
+                    <button data-order-id="${order.id}" class="delivered-btn bg-gray-200 text-gray-700 text-xs font-bold py-2 px-3 rounded-full hover:bg-red-500 hover:text-white transition">Delivered</button>
                 </div>
             `;
             activeOrdersList.appendChild(orderCard);
@@ -178,10 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function removeOrder(orderIdToRemove) {
         let activeOrders = JSON.parse(localStorage.getItem('customerActiveOrders')) || [];
-        activeOrders = activeOrders.filter(id => id !== orderIdToRemove);
+        activeOrders = activeOrders.filter(order => order.id !== orderIdToRemove);
         localStorage.setItem('customerActiveOrders', JSON.stringify(activeOrders));
-        displayActiveOrders(); // Re-render the list
-        showActiveOrdersButton(); // Hide the main button if no orders are left
+        displayActiveOrders(); 
+        showActiveOrdersButton(); 
         showMessage(`Order ${orderIdToRemove} has been cleared.`);
     }
 
@@ -230,7 +247,6 @@ showMessage(errorMessage);console.error(`Geolocation Error (Code ${error.code}):
     function saveCustomerDetails(){const d={name:customerNameInput.value,contact:customerContactInput.value,address:customerAddressInput.value};localStorage.setItem('orderingAppCustomerDetails',JSON.stringify(d))}
     function loadCustomerDetails(){const d=localStorage.getItem('orderingAppCustomerDetails');if(d){const p=JSON.parse(d);customerNameInput.value=p.name||'';customerContactInput.value=p.contact||'';customerAddressInput.value=p.address||''}}
     
-    // --- EVENT LISTENERS ---
     activeOrdersBtn.addEventListener('click', () => { 
         displayActiveOrders(); 
         activeOrdersPanel.classList.add('open');
@@ -238,10 +254,9 @@ showMessage(errorMessage);console.error(`Geolocation Error (Code ${error.code}):
     closeOrdersPanelBtn.addEventListener('click', () => { 
         activeOrdersPanel.classList.remove('open');
     });
-    // New: Event listener for removing orders
     activeOrdersList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('clear-order-btn')) {
-            const orderId = e.target.dataset.orderId;
+        if (e.target.closest('.delivered-btn')) {
+            const orderId = e.target.closest('.delivered-btn').dataset.orderId;
             removeOrder(orderId);
         }
     });
@@ -262,3 +277,4 @@ openProductDetailModal(p)}});
 </script>
 </body>
 </html>
+
