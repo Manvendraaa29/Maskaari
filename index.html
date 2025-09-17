@@ -66,10 +66,6 @@
     <div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center"><div class="loader"></div><p class="text-white text-lg mt-4">Processing your order...</p></div>
     <div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10"><p id="message-text"></p></div>
 
-    <!-- THE FIX: Hidden iframe and form for reliable POST requests -->
-    <iframe name="hidden-iframe" style="display:none;"></iframe>
-    <form id="get-orders-form" method="post" target="hidden-iframe" style="display:none;"></form>
-
 <script>
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjujj6ixAUQZPWfjX8-S2ffFsNcHiZuJljT8bpLmxnNf_SPh2CRnCQdzS9E68v_Q3yCg/exec';
     const STORE_NAME = 'MASKAARI';
@@ -87,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pollingInterval;
 
     async function handlePayment() {
+        // ... (This function remains the same as your provided code)
         const name = customerNameInput.value.trim();
         const contact = customerContactInput.value.trim();
         const address = customerAddressInput.value.trim();
@@ -129,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initiateCashfreeCheckout(paymentSessionId) {
+        // ... (This function remains the same)
         loadingModal.classList.add('hidden');
         const cashfree = new Cashfree({ mode: "production" }); 
         cashfree.checkout({ paymentSessionId: paymentSessionId })
@@ -143,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // --- THE FIX: This function now uses the hidden form method ---
+    // --- THE FIX: This function now uses the JSONP method ---
     function fetchAndDisplayOrders() {
         const customerId = localStorage.getItem('customerContact');
         if (!customerId) {
@@ -151,35 +149,38 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const payload = {
-            action: 'getCustomerOrders',
-            customerId: customerId
-        };
+        // Define a unique callback function name to avoid conflicts
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
         
-        const form = document.getElementById('get-orders-form');
-        form.action = GOOGLE_SCRIPT_URL;
-        
-        // We use a trick here: the payload is sent as the value of a single input field
-        form.innerHTML = `<input type="hidden" name="payload" value='${JSON.stringify(payload)}'>`;
-
-        const iframe = document.querySelector('iframe[name="hidden-iframe"]');
-        
-        iframe.onload = () => {
+        // Make the callback function available globally
+        window[callbackName] = function(data) {
             try {
-                const body = iframe.contentWindow.document.body.innerText;
-                const result = JSON.parse(body);
-                if (result.success) {
-                    renderActiveOrders(result.orders);
+                if (data.success) {
+                    renderActiveOrders(data.orders);
                 } else {
-                    throw new Error(result.error || "Failed to parse orders from iframe.");
+                    throw new Error(data.error || "Failed to parse orders from JSONP.");
                 }
             } catch (error) {
-                 console.error("Error fetching customer orders:", error);
-                 activeOrdersList.innerHTML = `<p class="text-center text-red-500 mt-8">Could not load orders. Please check your connection and try again.</p>`;
+                console.error("Error processing JSONP data:", error);
+                activeOrdersList.innerHTML = `<p class="text-center text-red-500 mt-8">Could not load orders. There was a problem with the server response.</p>`;
             }
+            
+            // Cleanup the script tag and the global function
+            document.body.removeChild(document.getElementById(callbackName));
+            delete window[callbackName];
         };
 
-        form.submit();
+        const script = document.createElement('script');
+        script.id = callbackName;
+        script.src = `${GOOGLE_SCRIPT_URL}?action=getCustomerOrders&customerId=${customerId}&callback=${callbackName}`;
+        
+        script.onerror = () => {
+             activeOrdersList.innerHTML = `<p class="text-center text-red-500 mt-8">Could not connect to the order server. Please check your connection.</p>`;
+             document.body.removeChild(script);
+             delete window[callbackName];
+        };
+
+        document.body.appendChild(script);
     }
     
     // ... (All other functions remain exactly the same as your provided code)
