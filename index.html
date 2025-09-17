@@ -70,14 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!address) { showMessage("Please enter your address."); customerAddressInput.focus(); return; }
         if (!location) { showMessage("Please enable location for ordering by clicking the button above."); return; }
         loadingModal.classList.remove('hidden');
+        
+        // Temporarily store cart details before payment
+        const tempOrderDetails = {
+            timestamp: new Date().toLocaleString(),
+            cart: { ...cart } 
+        };
+        sessionStorage.setItem('pendingOrder', JSON.stringify(tempOrderDetails));
+
         const totalPrice = calculateTotalPrice();
-        const cartDetails = {};
+        const cartDetailsForScript = {};
         Object.entries(cart).forEach(([id, qty]) => {
             const product = getProductById(id);
-            if(product) cartDetails[product.name] = { quantity: qty, price: product.price };
+            if(product) cartDetailsForScript[product.name] = { quantity: qty, price: product.price };
         });
-        const returnUrl = window.location.href.split('?')[0].replace(/index\.html$/, '') + 'success.html';
-        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetails, customer: { name, contact, address, location }, return_url: returnUrl };
+
+        // UPDATED: The return URL now points to status.html
+        const returnUrl = window.location.href.split('?')[0].replace(/index\.html$/, '') + 'status.html';
+        
+        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetailsForScript, customer: { name, contact, address, location }, return_url: returnUrl };
+        
         try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
@@ -110,11 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Cashfree error:", result.error);
                 }
                 if (result.redirect) {
-                    console.log("Redirecting to success page via Cashfree.");
+                    console.log("Redirecting to verification page via Cashfree.");
                 }
             });
     }
 
+    // --- All other functions remain the same ---
     function initializeStore(){products=menuData.products;categories=menuData.categories;storeNameBanner.textContent=STORE_NAME;const bannerTagline=document.getElementById('store-tagline-banner');bannerTagline.textContent="Muska hai Boss! Plain to sab khate.";const bannerImg=document.querySelector('header img');bannerImg.src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI";renderCategories();renderProducts('all');loadCartFromStorage();loadCustomerDetails();updateCart();}
     function renderCategories(){categoryFilters.innerHTML='';const allBtn=document.createElement('button');allBtn.className='category-btn active text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';allBtn.textContent='All';allBtn.dataset.filter='all';categoryFilters.appendChild(allBtn);categories.forEach(category=>{const button=document.createElement('button');button.className='category-btn text-sm whitespace-nowrap px-4 py-2 rounded-full transition-colors duration-200 bg-gray-100 text-gray-700';button.textContent=category.name;button.dataset.filter=category.id;categoryFilters.appendChild(button)})}
     function renderProducts(filter='all'){productGrid.innerHTML='';const filteredProducts=filter==='all'?products:products.filter(p=>p.category===filter);filteredProducts.forEach(product=>{const card=document.createElement('div');card.className='product-card flex h-36 bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 cursor-pointer';card.dataset.productId=product.id;const typeIcon=product.type==='veg'?`<div class="w-5 h-5 border border-green-600 flex items-center justify-center mr-2"><div class="w-3 h-3 bg-green-600 rounded-full"></div></div>`:`<div class="w-5 h-5 border border-red-600 flex items-center justify-center mr-2"><div class="w-0 h-0 border-l-[6px] border-l-transparent border-t-[9px] border-t-red-600 border-r-[6px] border-r-transparent"></div></div>`;const priceHTML=product.priceUnit?`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(0)} / ${product.priceUnit}</span>`:`<span class="text-lg font-semibold text-gray-800">₹${product.price.toFixed(2)}</span>`;card.innerHTML=`<img src="${product.image}" alt="${product.name}" class="w-32 h-full object-cover flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/300x300/CCCCCC/FFFFFF?text=Image+Not+Found';"><div class="p-3 flex flex-col flex-grow"><div class="flex items-center">${typeIcon}<h3 class="font-semibold text-gray-800">${product.name}</h3></div><div class="mt-1 flex-grow"><p class="text-sm text-gray-500 truncate-2-lines">${product.description.split('\n\n')[0]}</p></div><div class="flex justify-between items-center mt-auto pt-2">${priceHTML}<div class="product-action"></div></div></div>`;productGrid.appendChild(card);updateProductCard(product.id)})}
@@ -152,3 +165,4 @@ showMessage(errorMessage);console.error(`Geolocation Error (Code ${error.code}):
 </script>
 </body>
 </html>
+
