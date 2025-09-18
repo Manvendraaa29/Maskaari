@@ -1,71 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Status - MASKAARI</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Status - MASKAARI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+  </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-6">
 
-<div id="status-box" class="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
-  <h1 id="status-title" class="text-3xl font-bold mb-4">Checking Payment...</h1>
-  <p id="status-message" class="text-gray-600 mb-6">Please wait while we verify your payment.</p>
-  <div id="loader" class="mx-auto mb-6 w-12 h-12 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
-  <button id="back-btn" class="hidden bg-orange-500 text-white py-3 px-6 rounded-lg shadow hover:bg-orange-600">Back to Store</button>
-</div>
+  <div id="status-box" class="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
+    <h1 id="status-title" class="text-3xl font-bold mb-4">Checking Payment...</h1>
+    <p id="status-message" class="text-gray-600 mb-6">Please wait while we verify your payment.</p>
+    <div id="loader" class="mx-auto mb-6 w-12 h-12 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
+    <button id="back-btn" class="hidden bg-orange-500 text-white py-3 px-6 rounded-lg shadow hover:bg-orange-600">Back to Store</button>
+  </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const orderId = urlParams.get("order_id") || "UNKNOWN";
-  const statusTitle = document.getElementById("status-title");
-  const statusMessage = document.getElementById("status-message");
-  const loader = document.getElementById("loader");
-  const backBtn = document.getElementById("back-btn");
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzFxGf0as_OVss69dAin3dB0dxn1oxnLEHyzZPr7xnXHONl2vK6NCwXr0Tqc8ytAsfy1g/exec";
 
-  backBtn.addEventListener("click", () => window.location.href = "index.html");
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const statusTitle = document.getElementById("status-title");
+      const statusMessage = document.getElementById("status-message");
+      const loader = document.getElementById("loader");
+      const backBtn = document.getElementById("back-btn");
 
-  async function checkStatus() {
-    try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycby3Z9Y1CwIS4x7IUSWrhlmYf4QCLBDKEhLvDEoPqlHCc3Q1VPVS-LqIbQIZj29juglgoQ/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "getOrderStatus", orderId })
+      const orderId = urlParams.get("order_id") || "UNKNOWN";
+
+      const cart = JSON.parse(sessionStorage.getItem("cart") || "[]");
+      const customer = JSON.parse(sessionStorage.getItem("customerInfo") || "{}");
+
+      async function saveOrder(status) {
+        try {
+          const res = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "saveOrder",
+              orderId,
+              customer,
+              cart,
+              status
+            })
+          });
+          return await res.json();
+        } catch (err) {
+          console.error("Error saving order:", err);
+          return null;
+        }
+      }
+
+      async function checkOrderStatus() {
+        try {
+          const res = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "getOrderStatus",
+              orderId
+            })
+          });
+          const data = await res.json();
+          return data.status || "Pending Payment";
+        } catch (err) {
+          console.error("Error checking status:", err);
+          return "Pending Payment";
+        }
+      }
+
+      async function updateStatusLoop() {
+        let status = await checkOrderStatus();
+        if (status.toLowerCase() === "paid") {
+          statusTitle.textContent = "✅ Payment Successful!";
+          statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
+          loader.classList.add("hidden");
+          backBtn.classList.remove("hidden");
+          sessionStorage.removeItem("cart");
+        } else if (status.toLowerCase() === "failed") {
+          statusTitle.textContent = "❌ Payment Failed!";
+          statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
+          loader.classList.add("hidden");
+          backBtn.classList.remove("hidden");
+        } else {
+          statusTitle.textContent = "ℹ️ Payment Status Pending";
+          statusMessage.textContent = "We’re still waiting for confirmation. Refresh this page in a moment.";
+          setTimeout(updateStatusLoop, 5000); // retry every 5 sec
+        }
+      }
+
+      backBtn.addEventListener("click", () => {
+        window.location.href = "index.html";
       });
 
-      const data = await res.json();
-      const status = data.status || "Pending Payment";
-
-      if (status === "Paid") {
-        statusTitle.textContent = "✅ Payment Successful!";
-        statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
-        loader.classList.add("hidden");
-        backBtn.classList.remove("hidden");
-        sessionStorage.removeItem("cart");
-      } else if (status === "Failed") {
-        statusTitle.textContent = "❌ Payment Failed!";
-        statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
-        loader.classList.add("hidden");
-        backBtn.classList.remove("hidden");
-      } else {
-        statusTitle.textContent = "ℹ️ Payment Status Pending";
-        statusMessage.textContent = "We’re still waiting for confirmation...";
-        setTimeout(checkStatus, 4000); // Poll every 4 seconds
-      }
-    } catch (err) {
-      console.error("Error checking status:", err);
-      statusMessage.textContent = "Error checking status. Retrying...";
-      setTimeout(checkStatus, 5000);
-    }
-  }
-
-  checkStatus(); // Start polling
-});
-</script>
+      // Initial save as Pending
+      saveOrder("Pending Payment").then(() => {
+        updateStatusLoop();
+      });
+    });
+  </script>
 
 </body>
 </html>
