@@ -23,15 +23,17 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const urlParams = new URLSearchParams(window.location.search);
+
       const statusTitle = document.getElementById("status-title");
       const statusMessage = document.getElementById("status-message");
       const loader = document.getElementById("loader");
       const backBtn = document.getElementById("back-btn");
 
-      const orderId = urlParams.get("order_id") || "UNKNOWN";
-
-      const cart = JSON.parse(sessionStorage.getItem("cart") || "[]");
-      const customer = JSON.parse(sessionStorage.getItem("customerInfo") || "{}");
+      // Load pending order from sessionStorage
+      const pendingOrder = JSON.parse(sessionStorage.getItem("pendingOrder") || "{}");
+      const cart = pendingOrder.cart || [];
+      const customer = pendingOrder.customer || {};
+      const orderId = urlParams.get("order_id") || pendingOrder.orderId || "UNKNOWN";
 
       async function saveOrder(status) {
         try {
@@ -73,13 +75,15 @@
 
       async function updateStatusLoop() {
         let status = await checkOrderStatus();
-        if (status.toLowerCase() === "paid") {
+        status = status.toLowerCase();
+
+        if (status === "paid") {
           statusTitle.textContent = "✅ Payment Successful!";
           statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
           loader.classList.add("hidden");
           backBtn.classList.remove("hidden");
-          sessionStorage.removeItem("cart");
-        } else if (status.toLowerCase() === "failed") {
+          sessionStorage.removeItem("pendingOrder");
+        } else if (status === "failed") {
           statusTitle.textContent = "❌ Payment Failed!";
           statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
           loader.classList.add("hidden");
@@ -95,7 +99,7 @@
         window.location.href = "index.html";
       });
 
-      // Initial save as Pending
+      // Initial save as Pending Payment
       saveOrder("Pending Payment").then(() => {
         updateStatusLoop();
       });
