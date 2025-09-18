@@ -2,55 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment Status</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 100px;
+      margin: 50px;
     }
-    .success { color: green; }
-    .failed { color: red; }
-    .pending { color: orange; }
+    #status-message {
+      font-size: 1.2em;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <h2>Checking your payment status...</h2>
-  <p id="statusMsg">Please wait a moment.</p>
+  <div id="status-message">Please wait...</div>
 
   <script>
-    // ✅ Your deployed Apps Script Web App URL
-    const scriptURL = "https://script.google.com/macros/s/AKfycby3Z9Y1CwIS4x7IUSWrhlmYf4QCLBDKEhLvDEoPqlHCc3Q1VPVS-LqIbQIZj29juglgoQ/exec";
-
-    // Get order_id from URL (Cashfree redirects like: status.html?order_id=123)
+    // Extract order_id from URL query string (?order_id=MASKAARI-12345)
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get("order_id");
 
-    const statusMsg = document.getElementById("statusMsg");
-
     if (!orderId) {
-      statusMsg.innerHTML = "<span class='failed'>No order ID found in redirect URL.</span>";
+      document.getElementById("status-message").innerHTML = "⚠️ Missing order ID!";
     } else {
-      fetch(`${scriptURL}?action=verifyOrder&order_id=${orderId}`)
-        .then(res => res.json())
-        .then(data => {
-          console.log("Verification response:", data);
-
-          if (data.success && data.status === "Paid") {
-            statusMsg.innerHTML = "<span class='success'>✅ Payment Successful! Thank you 🎉</span>";
-          } else if (data.success && data.status === "Pending Payment") {
-            statusMsg.innerHTML = "<span class='pending'>⏳ Payment Pending. Please check back later.</span>";
-          } else if (data.success && data.status === "Failed") {
-            statusMsg.innerHTML = "<span class='failed'>❌ Payment Failed. Please try again.</span>";
-          } else {
-            statusMsg.innerHTML = "<span class='failed'>⚠️ Error: " + (data.error || "Unknown status") + "</span>";
-          }
-        })
-        .catch(err => {
-          console.error("Verification error:", err);
-          statusMsg.innerHTML = "<span class='failed'>⚠️ Error verifying payment. Please contact support.</span>";
-        });
+      fetch("https://script.google.com/macros/s/AKfycby3Z9Y1CwIS4x7IUSWrhlmYf4QCLBDKEhLvDEoPqlHCc3Q1VPVS-LqIbQIZj29juglgoQ/exec?action=verifyOrder&order_id=" + orderId, {
+        method: "GET",
+        mode: "cors"
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "Paid") {
+          document.getElementById("status-message").innerHTML = "✅ Payment verified successfully!";
+        } else if (data.status === "Pending Payment") {
+          document.getElementById("status-message").innerHTML = "⌛ Payment is still pending...";
+        } else {
+          document.getElementById("status-message").innerHTML = "⚠️ Error: " + (data.error || "Unknown issue");
+        }
+      })
+      .catch(err => {
+        document.getElementById("status-message").innerHTML = "⚠️ Network error. Please try again.";
+        console.error(err);
+      });
     }
   </script>
 </body>
