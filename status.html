@@ -19,7 +19,7 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const orderId = urlParams.get("order_id") || "UNKNOWN";
   const statusTitle = document.getElementById("status-title");
@@ -27,39 +27,43 @@ document.addEventListener("DOMContentLoaded", async () => {
   const loader = document.getElementById("loader");
   const backBtn = document.getElementById("back-btn");
 
-  async function getRealStatus() {
+  backBtn.addEventListener("click", () => window.location.href = "index.html");
+
+  async function checkStatus() {
     try {
       const res = await fetch("https://script.google.com/macros/s/AKfycby3Z9Y1CwIS4x7IUSWrhlmYf4QCLBDKEhLvDEoPqlHCc3Q1VPVS-LqIbQIZj29juglgoQ/exec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "getOrderStatus", orderId })
       });
+
       const data = await res.json();
-      return data.status || "Pending Payment";
-    } catch {
-      return "Pending Payment";
+      const status = data.status || "Pending Payment";
+
+      if (status === "Paid") {
+        statusTitle.textContent = "✅ Payment Successful!";
+        statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
+        loader.classList.add("hidden");
+        backBtn.classList.remove("hidden");
+        sessionStorage.removeItem("cart");
+      } else if (status === "Failed") {
+        statusTitle.textContent = "❌ Payment Failed!";
+        statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
+        loader.classList.add("hidden");
+        backBtn.classList.remove("hidden");
+      } else {
+        statusTitle.textContent = "ℹ️ Payment Status Pending";
+        statusMessage.textContent = "We’re still waiting for confirmation...";
+        setTimeout(checkStatus, 4000); // Poll every 4 seconds
+      }
+    } catch (err) {
+      console.error("Error checking status:", err);
+      statusMessage.textContent = "Error checking status. Retrying...";
+      setTimeout(checkStatus, 5000);
     }
   }
 
-  const realStatus = await getRealStatus();
-
-  if (realStatus === "Paid") {
-    statusTitle.textContent = "✅ Payment Successful!";
-    statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
-    loader.classList.add("hidden");
-    backBtn.classList.remove("hidden");
-    sessionStorage.removeItem("cart");
-  } else if (realStatus === "Failed") {
-    statusTitle.textContent = "❌ Payment Failed!";
-    statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
-    loader.classList.add("hidden");
-    backBtn.classList.remove("hidden");
-  } else {
-    statusTitle.textContent = "ℹ️ Payment Status Pending";
-    statusMessage.textContent = "We’re still waiting for confirmation. Refresh this page in a moment.";
-  }
-
-  backBtn.addEventListener("click", () => window.location.href = "index.html");
+  checkStatus(); // Start polling
 });
 </script>
 
