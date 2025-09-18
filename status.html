@@ -1,81 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Status - MASKAARI</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Status - MASKAARI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
+</style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-6">
 
-  <div id="status-box" class="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
-    <h1 id="status-title" class="text-3xl font-bold mb-4">Checking Payment...</h1>
-    <p id="status-message" class="text-gray-600 mb-6">Please wait while we verify your payment.</p>
-    <div id="loader" class="mx-auto mb-6 w-12 h-12 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
-    <button id="back-btn" class="hidden bg-orange-500 text-white py-3 px-6 rounded-lg shadow hover:bg-orange-600">Back to Store</button>
-  </div>
+<div id="status-box" class="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full text-center">
+  <h1 id="status-title" class="text-3xl font-bold mb-4">Checking Payment...</h1>
+  <p id="status-message" class="text-gray-600 mb-6">Please wait while we verify your payment.</p>
+  <div id="loader" class="mx-auto mb-6 w-12 h-12 border-4 border-gray-200 border-t-green-500 rounded-full animate-spin"></div>
+  <button id="back-btn" class="hidden bg-orange-500 text-white py-3 px-6 rounded-lg shadow hover:bg-orange-600">Back to Store</button>
+</div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const statusTitle = document.getElementById("status-title");
-      const statusMessage = document.getElementById("status-message");
-      const loader = document.getElementById("loader");
-      const backBtn = document.getElementById("back-btn");
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const orderId = urlParams.get("order_id") || "UNKNOWN";
+  const statusTitle = document.getElementById("status-title");
+  const statusMessage = document.getElementById("status-message");
+  const loader = document.getElementById("loader");
+  const backBtn = document.getElementById("back-btn");
 
-      // Cashfree redirect params
-      const paymentStatus = (urlParams.get("order_status") || "unknown").toLowerCase();
-      const orderId = urlParams.get("order_id") || "UNKNOWN";
-
-      // Cart + customer info from sessionStorage
-      const cart = JSON.parse(sessionStorage.getItem("cart") || "[]");
-      const customer = JSON.parse(sessionStorage.getItem("customerInfo") || "{}");
-
-      function saveOrder(status) {
-        fetch("https://script.google.com/macros/s/AKfycby3Z9Y1CwIS4x7IUSWrhlmYf4QCLBDKEhLvDEoPqlHCc3Q1VPVS-LqIbQIZj29juglgoQ/exec", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "saveOrder",
-            orderId: orderId,
-            customer: customer,
-            cart: cart,
-            status: status
-          })
-        })
-        .then(res => res.json())
-        .then(data => console.log("Order saved:", data))
-        .catch(err => console.error("Error saving order:", err));
-      }
-
-      if (paymentStatus === "success") {
-        statusTitle.textContent = "✅ Payment Successful!";
-        statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
-        loader.classList.add("hidden");
-        backBtn.classList.remove("hidden");
-        saveOrder("Paid");
-        sessionStorage.removeItem("cart");
-      } else if (paymentStatus === "failed") {
-        statusTitle.textContent = "❌ Payment Failed!";
-        statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
-        loader.classList.add("hidden");
-        backBtn.classList.remove("hidden");
-        saveOrder("Failed");
-      } else {
-        statusTitle.textContent = "ℹ️ Payment Status Pending";
-        statusMessage.textContent = "We’re still waiting for confirmation. Refresh this page in a moment.";
-        // Optional: log pending attempts
-        saveOrder("Pending Payment");
-      }
-
-      backBtn.addEventListener("click", () => {
-        window.location.href = "index.html";
+  async function getRealStatus() {
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycby3Z9Y1CwIS4x7IUSWrhlmYf4QCLBDKEhLvDEoPqlHCc3Q1VPVS-LqIbQIZj29juglgoQ/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "getOrderStatus", orderId })
       });
-    });
-  </script>
+      const data = await res.json();
+      return data.status || "Pending Payment";
+    } catch {
+      return "Pending Payment";
+    }
+  }
+
+  const realStatus = await getRealStatus();
+
+  if (realStatus === "Paid") {
+    statusTitle.textContent = "✅ Payment Successful!";
+    statusMessage.textContent = "Thank you for ordering with MASKAARI. Your order is confirmed!";
+    loader.classList.add("hidden");
+    backBtn.classList.remove("hidden");
+    sessionStorage.removeItem("cart");
+  } else if (realStatus === "Failed") {
+    statusTitle.textContent = "❌ Payment Failed!";
+    statusMessage.textContent = "Unfortunately, your payment did not go through. Please try again.";
+    loader.classList.add("hidden");
+    backBtn.classList.remove("hidden");
+  } else {
+    statusTitle.textContent = "ℹ️ Payment Status Pending";
+    statusMessage.textContent = "We’re still waiting for confirmation. Refresh this page in a moment.";
+  }
+
+  backBtn.addEventListener("click", () => window.location.href = "index.html");
+});
+</script>
 
 </body>
 </html>
