@@ -1,156 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MASKAARI</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
-<style>
-  body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-  .category-btn.active { background-color: #FB923C; color: white; font-weight: 600; }
-  .loader { border: 4px solid #f3f3f3; border-top: 4px solid #FB923C; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  .truncate-2-lines { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASKAARI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        .category-btn.active { background-color: #FB923C; color: white; font-weight: 600; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #FB923C; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .truncate-2-lines { overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    </style>
 </head>
 <body class="bg-gray-50">
 
 <header class="relative bg-gray-800">
-  <img src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI" 
-       alt="Store Banner" 
-       class="w-full h-48 object-cover"
-       onerror="this.onerror=null;this.src='https://placehold.co/600x300/CCCCCC/FFFFFF?text=Banner+Image';">
-  <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white p-4">
-    <h1 id="store-name-banner" class="text-3xl font-bold">MASKAARI</h1>
-    <p id="store-tagline-banner" class="text-lg mt-1">Muska hai Boss! Plain to sab khate.</p>
-  </div>
+    <img src="https://placehold.co/600x300/27272A/FBBF24?text=MASKAARI" 
+         alt="Store Banner" 
+         class="w-full h-48 object-cover"
+         onerror="this.onerror=null;this.src='https://placehold.co/600x300/CCCCCC/FFFFFF?text=Banner+Image';">
+    <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white p-4">
+        <h1 id="store-name-banner" class="text-3xl font-bold">MASKAARI</h1>
+        <p id="store-tagline-banner" class="text-lg mt-1">Muska hai Boss! Plain to sab khate.</p>
+    </div>
 </header>
 
 <div id="category-bar-container" class="sticky top-0 bg-white shadow-md z-20 py-2">
-  <div id="category-filters" class="flex justify-center items-center space-x-2 px-4 overflow-x-auto no-scrollbar"></div>
+    <div id="category-filters" class="flex justify-center items-center space-x-2 px-4 overflow-x-auto no-scrollbar"></div>
 </div>
 
 <main class="p-4 max-w-3xl mx-auto pb-24">
-  <div id="product-grid" class="grid grid-cols-1 gap-4"></div>
+    <div id="product-grid" class="grid grid-cols-1 gap-4"></div>
 </main>
 
 <div id="cart-bar" class="hidden fixed bottom-0 left-0 right-0 bg-orange-500 text-white p-3 shadow-lg flex justify-between items-center transform translate-y-full transition-transform duration-300">
-  <div>
-    <p id="cart-bar-items" class="font-bold">0 Items</p>
-    <p id="cart-bar-total" class="text-sm">₹0.00</p>
-  </div>
-  <button id="view-cart-btn" class="bg-white text-orange-500 font-bold py-2 px-6 rounded-md">View Cart</button>
+     <div><p id="cart-bar-items" class="font-bold">0 Items</p><p id="cart-bar-total" class="text-sm">₹0.00</p></div>
+     <button id="view-cart-btn" class="bg-white text-orange-500 font-bold py-2 px-6 rounded-md">View Cart</button>
 </div>
 
 <div id="product-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-end justify-center">
-  <div id="product-detail-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] flex flex-col"></div>
+    <div id="product-detail-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl transform translate-y-full transition-transform duration-300 max-h-[90vh] flex flex-col"></div>
 </div>
 
 <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex items-end justify-center">
-  <div id="cart-modal-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl p-4 transform translate-y-full transition-transform duration-300 max-h-[85vh] flex flex-col">
-    <div class="flex justify-between items-center border-b pb-3 mb-3">
-      <h2 class="text-2xl font-bold text-gray-800">Your Order</h2>
-      <button id="close-cart-modal-btn" class="text-gray-500 hover:text-gray-800">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
+    <div id="cart-modal-content" class="bg-gray-50 w-full max-w-3xl rounded-t-2xl p-4 transform translate-y-full transition-transform duration-300 max-h-[85vh] flex flex-col">
+        <div class="flex justify-between items-center border-b pb-3 mb-3">
+            <h2 class="text-2xl font-bold text-gray-800">Your Order</h2>
+            <button id="close-cart-modal-btn" class="text-gray-500 hover:text-gray-800">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow mb-4">
+            <h3 class="font-bold text-lg mb-2 text-gray-700">Your Details</h3>
+            <input type="text" id="customer-name" placeholder="* Enter your name" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+            <input type="tel" id="customer-contact" placeholder="* Enter your WhatsApp number (10 digits)" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
+            <textarea id="customer-address" placeholder="* Enter your delivery address" rows="2" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"></textarea>
+            <button id="get-location-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Use My Current Location
+            </button>
+            <input type="hidden" id="customer-location">
+        </div>
+        <div id="cart-items-list" class="flex-grow overflow-y-auto space-y-3"></div>
+        <div id="empty-cart-message" class="hidden text-center py-10">
+            <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <h3 class="mt-4 text-xl font-semibold text-gray-500">Your cart is empty</h3>
+            <p class="text-gray-400">Add items from the menu to get started!</p>
+        </div>
+        <div class="mt-auto border-t pt-4">
+            <div class="flex justify-between items-center text-lg font-bold text-gray-800"><span>Total Amount</span><span id="cart-total">₹0.00</span></div>
+            <button id="proceed-to-pay-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 px-4 rounded-lg mt-4 hover:bg-green-600 transition shadow-lg flex items-center justify-center">Proceed to Pay</button>
+        </div>
     </div>
-    <div class="bg-white p-4 rounded-lg shadow mb-4">
-      <h3 class="font-bold text-lg mb-2 text-gray-700">Your Details</h3>
-      <input type="text" id="customer-name" placeholder="* Enter your name" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
-      <input type="tel" id="customer-contact" placeholder="* Enter your WhatsApp number (10 digits)" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent">
-      <textarea id="customer-address" placeholder="* Enter your delivery address" rows="2" class="w-full p-2 border rounded-md mb-2 focus:ring-2 focus:ring-orange-400 focus:border-transparent"></textarea>
-      <button id="get-location-btn" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition flex items-center justify-center">
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>Use My Current Location
-      </button>
-      <input type="hidden" id="customer-location">
-    </div>
-    <div id="cart-items-list" class="flex-grow overflow-y-auto space-y-3"></div>
-    <div id="empty-cart-message" class="hidden text-center py-10">
-      <svg class="w-16 h-16 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-      </svg>
-      <h3 class="mt-4 text-xl font-semibold text-gray-500">Your cart is empty</h3>
-      <p class="text-gray-400">Add items from the menu to get started!</p>
-    </div>
-    <div class="mt-auto border-t pt-4">
-      <div class="flex justify-between items-center text-lg font-bold text-gray-800">
-        <span>Total Amount</span>
-        <span id="cart-total">₹0.00</span>
-      </div>
-      <button id="proceed-to-pay-btn" class="w-full bg-green-500 text-white text-lg font-bold py-3 px-4 rounded-lg mt-4 hover:bg-green-600 transition shadow-lg flex items-center justify-center">Proceed to Pay</button>
-    </div>
-  </div>
 </div>
 
-<div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center">
-  <div class="loader"></div>
-  <p class="text-white text-lg mt-4">Processing your order...</p>
-</div>
-
-<div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10">
-  <p id="message-text"></p>
-</div>
+<div id="loading-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center"><div class="loader"></div><p class="text-white text-lg mt-4">Processing your order...</p></div>
+<div id="message-box" class="hidden fixed top-5 left-1/2 -translate-x-1/2 bg-gray-800 text-white py-2 px-5 rounded-full shadow-lg z-50 transition-all duration-300 opacity-0 transform -translate-y-10"><p id="message-text"></p></div>
 
 <script>
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFxGf0as_OVss69dAin3dB0dxn1oxnLEHyzZPr7xnXHONl2vK6NCwXr0Tqc8ytAsfy1g/exec';
 const STORE_NAME = 'MASKAARI';
-const menuData = {...}; // Keep your JSON here
+const menuData = {/* your menuData here (unchanged) */};
+</script>
 
+<script>
+// === MAIN APP SCRIPT ===
 document.addEventListener('DOMContentLoaded', () => {
-  let cart = {};
-  let products = [];
-  let categories = [];
+    let cart = {}, products = [], categories = [];
+    const categoryFilters = document.getElementById("category-filters"),
+        productGrid = document.getElementById("product-grid"),
+        cartBar = document.getElementById("cart-bar"),
+        cartBarItems = document.getElementById("cart-bar-items"),
+        cartBarTotal = document.getElementById("cart-bar-total"),
+        viewCartBtn = document.getElementById("view-cart-btn"),
+        productDetailModal = document.getElementById("product-detail-modal"),
+        productDetailContent = document.getElementById("product-detail-content"),
+        cartModal = document.getElementById("cart-modal"),
+        cartModalContent = document.getElementById("cart-modal-content"),
+        closeCartModalBtn = document.getElementById("close-cart-modal-btn"),
+        cartItemsList = document.getElementById("cart-items-list"),
+        emptyCartMessage = document.getElementById("empty-cart-message"),
+        cartTotalSpan = document.getElementById("cart-total"),
+        proceedToPayBtn = document.getElementById("proceed-to-pay-btn"),
+        customerNameInput = document.getElementById("customer-name"),
+        customerContactInput = document.getElementById("customer-contact"),
+        customerAddressInput = document.getElementById("customer-address"),
+        customerLocationInput = document.getElementById("customer-location"),
+        getLocationBtn = document.getElementById("get-location-btn"),
+        storeNameBanner = document.getElementById("store-name-banner"),
+        loadingModal = document.getElementById("loading-modal");
 
-  const categoryFilters = document.getElementById("category-filters");
-  const productGrid = document.getElementById("product-grid");
-  const cartBar = document.getElementById("cart-bar");
-  const cartBarItems = document.getElementById("cart-bar-items");
-  const cartBarTotal = document.getElementById("cart-bar-total");
-  const viewCartBtn = document.getElementById("view-cart-btn");
-  const productDetailModal = document.getElementById("product-detail-modal");
-  const productDetailContent = document.getElementById("product-detail-content");
-  const cartModal = document.getElementById("cart-modal");
-  const cartModalContent = document.getElementById("cart-modal-content");
-  const closeCartModalBtn = document.getElementById("close-cart-modal-btn");
-  const cartItemsList = document.getElementById("cart-items-list");
-  const emptyCartMessage = document.getElementById("empty-cart-message");
-  const cartTotalSpan = document.getElementById("cart-total");
-  const proceedToPayBtn = document.getElementById("proceed-to-pay-btn");
-  const customerNameInput = document.getElementById("customer-name");
-  const customerContactInput = document.getElementById("customer-contact");
-  const customerAddressInput = document.getElementById("customer-address");
-  const customerLocationInput = document.getElementById("customer-location");
-  const getLocationBtn = document.getElementById("get-location-btn");
-  const storeNameBanner = document.getElementById("store-name-banner");
-  const loadingModal = document.getElementById("loading-modal");
+    async function handlePayment() {
+        const name = customerNameInput.value.trim();
+        const contact = customerContactInput.value.trim();
+        const address = customerAddressInput.value.trim();
+        const location = customerLocationInput.value;
 
-  // -- All functions from your code here (initializeStore, renderProducts, updateCart, etc.) --
-  // -- Keep them as in your current code, but properly formatted for readability --
+        if (Object.keys(cart).length === 0) { showMessage("Your cart is empty!"); return; }
+        if (!name) { showMessage("Please enter your name."); customerNameInput.focus(); return; }
+        if (!contact || !/^\d{10}$/.test(contact)) { showMessage("Please enter a valid 10-digit WhatsApp number."); customerContactInput.focus(); return; }
+        if (!address) { showMessage("Please enter your address."); customerAddressInput.focus(); return; }
+        if (!location) { showMessage("Please enable location for ordering by clicking the button above."); return; }
 
-  // Initialize store
-  initializeStore();
+        loadingModal.classList.remove('hidden');
 
-  // Event listeners
-  viewCartBtn.addEventListener('click', openCartModal);
-  closeCartModalBtn.addEventListener('click', closeCartModal);
-  cartModal.addEventListener('click', (e) => { if (e.target === cartModal) closeCartModal(); });
-  [customerNameInput, customerContactInput, customerAddressInput].forEach(i => i.addEventListener('input', saveCustomerDetails));
-  getLocationBtn.addEventListener('click', getInitialLocation);
-  proceedToPayBtn.addEventListener('click', handlePayment);
+        const totalPrice = calculateTotalPrice();
+        const cartDetailsForScript = {};
+        Object.entries(cart).forEach(([id, qty]) => {
+            const product = getProductById(id);
+            if (product) cartDetailsForScript[product.name] = { quantity: qty, price: product.price };
+        });
 
-  productGrid.addEventListener('click', handleProductGridClick);
-  productDetailModal.addEventListener('click', handleProductDetailModalClick);
-  cartItemsList.addEventListener('click', handleCartItemsListClick);
-  categoryFilters.addEventListener('click', handleCategoryFilterClick);
+        const returnUrl = window.location.href.split('?')[0].replace(/index\.html$/, '') + 'status.html';
+        const orderPayload = { action: 'createOrder', total: totalPrice, cart: cartDetailsForScript, customer: { name, contact, address, location }, return_url: returnUrl };
+
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(orderPayload)
+            });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const result = await response.json();
+            if (result.success && result.payment_session_id) {
+                initiateCashfreeCheckout(result.payment_session_id);
+            } else {
+                throw new Error(result.error || 'Failed to create order from server.');
+            }
+        } catch (error) {
+            console.error('Error creating order:', error);
+            showMessage('Could not connect to the server. Please check your script and try again.');
+            loadingModal.classList.add('hidden');
+        }
+    }
+
+    function initiateCashfreeCheckout(paymentSessionId) {
+        loadingModal.classList.add('hidden');
+        const cashfree = new Cashfree({ mode: "production" });
+        cashfree.checkout({ paymentSessionId })
+            .then(result => {
+                if (result.error) { showMessage("Payment failed: " + result.error.message); console.error(result.error); }
+            });
+    }
+
+    // --- All other functions remain the same as your original code ---
+    // initializeStore(), renderProducts(), updateCart(), etc.
+    
+    // EVENT LISTENERS
+    viewCartBtn.addEventListener('click', () => cartModal.classList.remove('hidden'));
+    closeCartModalBtn.addEventListener('click', () => cartModalContent.classList.add('translate-y-full'));
+    getLocationBtn.addEventListener('click', getInitialLocation);
+    proceedToPayBtn.addEventListener('click', handlePayment);
+
+    initializeStore();
 });
 </script>
 </body>
